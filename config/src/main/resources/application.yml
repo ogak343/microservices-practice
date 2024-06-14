@@ -1,13 +1,19 @@
 spring:
   application:
-    name: config-services
+    name: config-service
   profiles:
-    active: native
+    active: config
   cloud:
     config:
       server:
         native:
           search-locations: classpath://configurations
+        git:
+          uri: https://github.com/ogak343/microservices-practice
+          clone-on-start: true
+          search-paths: config
+          default-label: master
+      override-system-properties: false
 
 server:
   port: 8888
