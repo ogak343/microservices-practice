@@ -20,10 +20,10 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/user" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/product" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/user" />
+            <option value="$PROJECT_DIR$/product" />
           </set>
         </option>
       </GradleProjectSettings>

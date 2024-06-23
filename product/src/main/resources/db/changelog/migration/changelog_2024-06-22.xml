@@ -1,0 +1,43 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="Ogabek">
+
+        <createTable tableName="category" schemaName="public">
+            <column name="id" type="bigserial" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="varchar"/>
+        </createTable>
+
+        <createTable tableName="product" schemaName="public">
+            <column name="id" type="bigserial" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar"/>
+            <column name="price" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="bigint">
+                <constraints references="category(id)" foreignKeyName="product_category_id" nullable="false"/>
+            </column>
+        </createTable>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -4,6 +4,7 @@
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/config" />
     <file type="web" url="file://$PROJECT_DIR$/eureka" />
+    <file type="web" url="file://$PROJECT_DIR$/product" />
     <file type="web" url="file://$PROJECT_DIR$/user" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="corretto-21" project-jdk-type="JavaSDK">

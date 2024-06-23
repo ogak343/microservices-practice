@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  user_db:
+  product_db:
     image: postgres:16
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: user_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: user
+      POSTGRES_DB: product_db
+      POSTGRES_USER: product
+      POSTGRES_PASSWORD: product
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
