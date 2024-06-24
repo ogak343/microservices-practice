@@ -10,7 +10,7 @@ import com.example.customer.dto.resp.LoginResp;
 public interface CustomerService {
     Long create(CustomerCreateReq customer);
 
-    CustomerResp get(Long id);
+    CustomerResp profile();
 
     CustomerResp update(CustomerUpdateReq dto);
 

@@ -1,5 +1,6 @@
 package com.example.customer.dto.req;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -7,5 +8,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class CustomerUpdateReq extends CustomerCreateReq {
 
+    @NotNull
     private Long id;
 }

@@ -7,6 +7,8 @@ import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
 import com.example.customer.dto.resp.LoginResp;
 import com.example.customer.service.CustomerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,13 +18,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/customers")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @Slf4j
 public class CustomerController {
 
     private final CustomerService service;
 
     @PostMapping("/create")
-    public ResponseEntity<Long> create(@RequestBody CustomerCreateReq customer) {
+    public ResponseEntity<Long> create(@RequestBody @Valid CustomerCreateReq customer) {
 
         log.info("CustomerCreateReq: {}", customer);
 
@@ -30,7 +33,7 @@ public class CustomerController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<LoginResp> confirm(@RequestBody CustomerConfirmReq customer) {
+    public ResponseEntity<LoginResp> confirm(@RequestBody @Valid CustomerConfirmReq customer) {
 
         log.info("CustomerConfirmReq: {}", customer);
 
@@ -38,23 +41,23 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResp> login(@RequestBody LoginReq login) {
+    public ResponseEntity<LoginResp> login(@RequestBody @Valid LoginReq login) {
 
         log.info("CustomerLoginReq: {}", login);
 
         return ResponseEntity.ok(service.login(login));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerResp> get(@PathVariable Long id) {
+    @GetMapping("/profile")
+    public ResponseEntity<CustomerResp> profile() {
 
-        log.info("CustomerGetReq: {}", id);
+        log.info("CustomerGetProfile: ");
 
-        return ResponseEntity.ok(service.get(id));
+        return ResponseEntity.ok(service.profile());
     }
 
     @PatchMapping
-    public ResponseEntity<CustomerResp> update(@RequestBody CustomerUpdateReq dto) {
+    public ResponseEntity<CustomerResp> update(@RequestBody @Valid CustomerUpdateReq dto) {
 
         log.info("CustomerUpdateReq: {}", dto);
 

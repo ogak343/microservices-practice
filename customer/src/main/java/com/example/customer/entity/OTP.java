@@ -1,9 +1,6 @@
 package com.example.customer.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +17,7 @@ import java.time.OffsetDateTime;
 public class OTP {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Integer code;
     @ManyToOne
@@ -29,7 +27,7 @@ public class OTP {
 
     @SneakyThrows
     public OTP(Customer customer) {
-        this.code = SecureRandom.getInstance("NativePRNG").nextInt(100000, 999999);
+        this.code = SecureRandom.getInstance("SHA1PRNG").nextInt(100000, 999999);
         this.customer = customer;
         this.createdAt = OffsetDateTime.now();
         this.expiredAt = OffsetDateTime.now().plusMinutes(30);

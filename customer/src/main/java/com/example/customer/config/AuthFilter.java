@@ -2,11 +2,13 @@ package com.example.customer.config;
 
 import com.example.customer.contants.ErrorMessage;
 import com.example.customer.exception.CustomException;
+import com.example.customer.repository.CustomerRepository;
 import com.example.customer.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,13 +24,16 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class AuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final CustomerRepository repository;
 
     @Autowired
-    public AuthFilter(JwtService jwtService) {
+    public AuthFilter(JwtService jwtService, CustomerRepository repository) {
         this.jwtService = jwtService;
+        this.repository = repository;
     }
 
     @Override
@@ -36,6 +41,7 @@ public class AuthFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        log.info("request came");
         final var header = Optional.ofNullable(request.getHeader("Authorization"));
         header.ifPresent(this::authenticate);
 
@@ -50,6 +56,9 @@ public class AuthFilter extends OncePerRequestFilter {
         final var token = header.substring(7);
 
         final var customerId = jwtService.extractId(token);
+
+        if (!repository.existsByIdAndActiveTrue(customerId))
+            throw new CustomException(ErrorMessage.WRONG_CREDENTIALS);
 
         final var role = jwtService.extractSubject(token);
 

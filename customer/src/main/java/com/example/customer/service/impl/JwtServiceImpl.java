@@ -25,7 +25,7 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public Long extractId(String token) {
-        return Long.valueOf(extractClaims(token, Claims::getSubject));
+        return Long.valueOf(extractClaims(token, Claims::getId));
     }
 
     @Override

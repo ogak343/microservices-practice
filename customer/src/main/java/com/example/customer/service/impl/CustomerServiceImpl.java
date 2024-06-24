@@ -69,6 +69,7 @@ public class CustomerServiceImpl implements CustomerService {
         var customer = otp.getCustomer();
         customer.setActive(true);
         repository.save(customer);
+        otpRepository.deleteOTPByCustomerId(customer.getId());
 
         return jwtService.generateToken(customer.getId(), ClientType.CUSTOMER);
     }
@@ -76,7 +77,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public LoginResp login(LoginReq login) {
 
-        var customer = repository.findByEmail(login.getEmail())
+        var customer = repository.findByEmailAndActiveTrue(login.getEmail())
                 .orElseThrow(() -> new EntityNotFoundException("Customer not found"));
 
         if (!encoder.matches(login.getPassword(), customer.getPassword()))
@@ -86,11 +87,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerResp get(Long id) {
+    public CustomerResp profile() {
 
-        validateAccess(id);
-
-        return mapper.toResp(repository.findById(id)
+        return mapper.toResp(repository.findById(getCustomerId())
                 .orElseThrow(() -> new EntityNotFoundException("Customer not found")));
     }
 
@@ -111,12 +110,11 @@ public class CustomerServiceImpl implements CustomerService {
     public void delete() {
 
         repository.deleteById(getCustomerId());
-
     }
 
     private Long getCustomerId() {
         try {
-            return (Long) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+            return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         } catch (ClassCastException e) {
             throw new CustomException(ErrorMessage.INVALID_TOKEN);
         }

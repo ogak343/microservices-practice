@@ -21,6 +21,16 @@ public class SecurityConfig {
 
     private final AuthFilter authFilter;
 
+    private static final String[] ACCESSED_URLS = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/v2/api-docs",
+            "/v3/api-docs",
+            "/v3/api-docs/**"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -31,6 +41,8 @@ public class SecurityConfig {
                                 registry.requestMatchers(HttpMethod.POST, "/customers/create").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/customers/login").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/customers/confirm").permitAll()
+                                        .requestMatchers(ACCESSED_URLS).permitAll()
+                                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
