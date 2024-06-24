@@ -1,6 +1,7 @@
 package com.example.customer.service.impl;
 
 import com.example.customer.contants.ErrorMessage;
+import com.example.customer.contants.ClientType;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
@@ -13,6 +14,7 @@ import com.example.customer.mapper.CustomerMapper;
 import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;
 import com.example.customer.service.CustomerService;
+import com.example.customer.service.JwtService;
 import com.example.customer.service.NotificationService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +35,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final OTPRepository otpRepository;
     private final NotificationService notificationService;
     private final BCryptPasswordEncoder encoder;
+    private final JwtService jwtService;
 
     @Override
     public Long create(CustomerCreateReq create) {
@@ -67,7 +70,7 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setActive(true);
         repository.save(customer);
 
-        return new LoginResp();
+        return jwtService.generateToken(customer.getId(), ClientType.CUSTOMER);
     }
 
     @Override
@@ -79,7 +82,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!encoder.matches(login.getPassword(), customer.getPassword()))
             throw new CustomException(ErrorMessage.WRONG_PASSWORD);
 
-        return new LoginResp();
+        return jwtService.generateToken(customer.getId(), ClientType.CUSTOMER);
     }
 
     @Override

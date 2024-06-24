@@ -10,11 +10,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 @Component
@@ -43,11 +47,18 @@ public class AuthFilter extends OncePerRequestFilter {
         if (!header.startsWith("Bearer "))
             throw new CustomException(ErrorMessage.INVALID_TOKEN);
 
-        var token = header.substring(7);
+        final var token = header.substring(7);
 
-        var customerId = jwtService.extractCustomerId(token);
+        final var customerId = jwtService.extractId(token);
 
-        var authentication = new UsernamePasswordAuthenticationToken(customerId, null, null);
+        final var role = jwtService.extractSubject(token);
+
+        var authentication = new UsernamePasswordAuthenticationToken(customerId, null, getAuthorities(role));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private Collection<? extends GrantedAuthority> getAuthorities(String role) {
+        GrantedAuthority authority = new SimpleGrantedAuthority(String.format("ROLE_%s", role));
+        return Collections.singleton(authority);
     }
 }

@@ -16,5 +16,5 @@ spring:
     change-log: db/changelog/Initializer.xml
     default-schema: public
     liquibase-schema: public
-  cassandra:
-    port: 8080
+server:
+  port: 8080

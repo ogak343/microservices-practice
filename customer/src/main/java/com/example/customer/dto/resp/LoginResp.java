@@ -9,5 +9,9 @@ public class LoginResp {
     private String message;
     private String token;
 
-
+    public LoginResp(int status, String message, String token) {
+        this.status = status;
+        this.message = message;
+        this.token = token;
+    }
 }
