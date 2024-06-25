@@ -2,11 +2,10 @@ package com.example.order.dto.req;
 
 import lombok.Data;
 
-import java.util.Set;
+import java.util.Map;
 
 @Data
 public class OrderUpdate {
     private Long orderId;
-    //TODO implement constraint for duplication of Ids with Custom validation @ annotation
-    private Set<ProductDetailsReq> productDetails;
+    private Map<Long, Integer> orders;
 }

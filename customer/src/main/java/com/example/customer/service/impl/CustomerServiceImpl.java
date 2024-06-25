@@ -71,7 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
         repository.save(customer);
         otpRepository.deleteOTPByCustomerId(customer.getId());
 
-        return jwtService.generateToken(customer.getId(), ClientType.CUSTOMER);
+        return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!encoder.matches(login.getPassword(), customer.getPassword()))
             throw new CustomException(ErrorMessage.WRONG_PASSWORD);
 
-        return jwtService.generateToken(customer.getId(), ClientType.CUSTOMER);
+        return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
     }
 
     @Override

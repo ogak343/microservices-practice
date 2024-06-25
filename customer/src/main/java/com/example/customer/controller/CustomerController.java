@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +26,7 @@ public class CustomerController {
     private final CustomerService service;
 
     @PostMapping("/create")
+    @PreAuthorize(value = "hasRole('CUSTOMER')")
     public ResponseEntity<Long> create(@RequestBody @Valid CustomerCreateReq customer) {
 
         log.info("CustomerCreateReq: {}", customer);
@@ -33,6 +35,7 @@ public class CustomerController {
     }
 
     @PostMapping("/confirm")
+    @PreAuthorize(value = "hasRole('CUSTOMER')")
     public ResponseEntity<LoginResp> confirm(@RequestBody @Valid CustomerConfirmReq customer) {
 
         log.info("CustomerConfirmReq: {}", customer);
@@ -41,6 +44,7 @@ public class CustomerController {
     }
 
     @PostMapping("/login")
+    @PreAuthorize(value = "hasRole('CUSTOMER')")
     public ResponseEntity<LoginResp> login(@RequestBody @Valid LoginReq login) {
 
         log.info("CustomerLoginReq: {}", login);
@@ -57,6 +61,7 @@ public class CustomerController {
     }
 
     @PatchMapping
+    @PreAuthorize(value = "hasRole('CUSTOMER')")
     public ResponseEntity<CustomerResp> update(@RequestBody @Valid CustomerUpdateReq dto) {
 
         log.info("CustomerUpdateReq: {}", dto);
@@ -65,6 +70,7 @@ public class CustomerController {
     }
 
     @DeleteMapping
+    @PreAuthorize(value = "hasRole('CUSTOMER')")
     public ResponseEntity<Void> delete() {
 
         log.info("CustomerDelete called!");

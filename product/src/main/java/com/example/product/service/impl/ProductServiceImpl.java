@@ -4,7 +4,6 @@ import com.example.product.config.exception.CustomException;
 import com.example.product.contants.ErrorCode;
 import com.example.product.dto.request.OrderCreate;
 import com.example.product.dto.request.ProductCreateReq;
-import com.example.product.dto.request.ProductDetailsReq;
 import com.example.product.dto.request.ProductUpdateReq;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.entity.Product;
@@ -15,6 +14,7 @@ import com.example.product.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,10 +23,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service(value = "PRODUCT")
 @RequiredArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repository;
@@ -82,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
 
         var products = repository.findAllByIdIn(order.getProducts().keySet());
 
-        return products.stream()
+        var price = products.stream()
                 .peek(x -> {
                     if (x.getQuantity() < order.getProducts().get(x.getId())) {
                         throw new CustomException(ErrorCode.INVALID_AMOUNT);
@@ -92,6 +92,11 @@ public class ProductServiceImpl implements ProductService {
                 })
                 .map(Product::getPrice)
                 .reduce(BigInteger.ZERO, BigInteger::add);
+
+        repository.saveAll(products);
+
+        log.info("price : {}", price);
+        return price;
     }
 
     private Specification<Product> makeSpecification(Long categoryId, String nameLike) {

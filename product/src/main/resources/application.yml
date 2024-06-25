@@ -18,3 +18,6 @@ spring:
     liquibase-schema: public
 server:
   port: 8080
+
+jwt:
+  secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711

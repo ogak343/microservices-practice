@@ -5,12 +5,14 @@ import com.example.product.dto.resp.ProductResp;
 import com.example.product.dto.request.ProductCreateReq;
 import com.example.product.dto.request.ProductUpdateReq;
 import com.example.product.service.ProductService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -19,11 +21,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @Slf4j
 public class ProductController {
 
     private final ProductService service;
-
 
     @PostMapping
     public ResponseEntity<ProductResp> create(@RequestBody @Valid ProductCreateReq product) {
@@ -34,6 +36,7 @@ public class ProductController {
     }
 
     @PostMapping("/order")
+    @PreAuthorize(value = "hasAuthority('ROLE_SERVICE')")
     public ResponseEntity<BigInteger> createOrder(@RequestBody @Valid OrderCreate order) {
 
         log.info("Create order: {}", order);
@@ -52,6 +55,7 @@ public class ProductController {
     }
 
     @GetMapping("/byIds")
+    @PreAuthorize(value = "hasAnyAuthority('ROLE_SERVICE')")
     public ResponseEntity<List<ProductResp>> getAll(@RequestParam List<Long> ids) {
 
         log.info("Get product by ids: {}", ids);
@@ -76,6 +80,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize(value = "hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
 
         log.info("Delete product: {}", id);

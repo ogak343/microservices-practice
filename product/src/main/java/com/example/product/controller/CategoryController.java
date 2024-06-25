@@ -4,6 +4,7 @@ import com.example.product.dto.request.CategoryCreateReq;
 import com.example.product.dto.request.CategoryUpdateReq;
 import com.example.product.dto.resp.CategoryResp;
 import com.example.product.service.CategoryService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @Slf4j
 public class CategoryController {
 

@@ -5,7 +5,10 @@ import com.example.order.config.FeignClientConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@FeignClient(configuration = FeignClientConfig.class)
+@FeignClient(name = "${feign.clients.customer.name}",
+        url = "${feign.clients.customer.url}",
+        path = "/customers",
+        configuration = FeignClientConfig.class)
 public interface CustomerFeignClient {
 
     @GetMapping("/profile")

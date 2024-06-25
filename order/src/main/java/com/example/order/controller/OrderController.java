@@ -4,6 +4,7 @@ import com.example.order.dto.req.OrderCreate;
 import com.example.order.dto.req.OrderUpdate;
 import com.example.order.dto.resp.OrderResp;
 import com.example.order.service.OrderService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @Slf4j
 public class OrderController {
 

@@ -1,7 +1,6 @@
 package com.example.customer.service.impl;
 
 import com.example.customer.contants.ClientType;
-import com.example.customer.dto.resp.LoginResp;
 import com.example.customer.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -34,8 +33,8 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public LoginResp generateToken(Long id, ClientType type) {
-        var token = Jwts
+    public String generateToken(Long id, ClientType type) {
+        return Jwts
                 .builder()
                 .signWith(getSecretKey(), SignatureAlgorithm.HS256)
                 .setId(String.valueOf(id))
@@ -43,8 +42,6 @@ public class JwtServiceImpl implements JwtService {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * expiresIn))
                 .compact();
-
-        return new LoginResp(200, "Success", token);
     }
 
     private <T> T extractClaims(String token, Function<Claims, T> claimsFunction) {

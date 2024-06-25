@@ -23,3 +23,12 @@ feign:
     product:
       name: product-client
       url: http://127.0.0.1:8080
+    customer:
+      name: customer-client
+      url: http://127.0.0.1:8081
+logging:
+  level:
+    com.example.order.client: DEBUG
+
+jwt:
+  secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711
