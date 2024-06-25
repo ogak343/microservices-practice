@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: order
+feign:
+  clients:
+    product:
+      name: product-client
+      url: http://127.0.0.1:8080

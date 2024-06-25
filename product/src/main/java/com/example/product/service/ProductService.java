@@ -5,6 +5,8 @@ import com.example.product.dto.request.ProductCreateReq;
 import com.example.product.dto.request.ProductUpdateReq;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface ProductService {
     ProductResp create(ProductCreateReq product);
 
@@ -16,4 +18,5 @@ public interface ProductService {
 
     Page<ProductResp> search(int page, int size, Long categoryId, String nameLike);
 
+    List<ProductResp> getAllByIds(List<Long> ids);
 }

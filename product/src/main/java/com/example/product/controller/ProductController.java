@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -39,6 +41,14 @@ public class ProductController {
 
         return ResponseEntity.ok(service.search(page, size, categoryId, nameLike));
     }
+
+    @GetMapping("/byIds")
+    public ResponseEntity<List<ProductResp>> getAll(@RequestParam List<Long> ids) {
+
+        log.info("Get product by ids: {}", ids);
+        return ResponseEntity.ok(service.getAllByIds(ids));
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResp> get(@PathVariable Long id) {

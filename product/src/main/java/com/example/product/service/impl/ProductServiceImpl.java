@@ -66,6 +66,11 @@ public class ProductServiceImpl implements ProductService {
                 .map(mapper::toResp);
     }
 
+    @Override
+    public List<ProductResp> getAllByIds(List<Long> ids) {
+        return repository.findAllById(ids).stream().map(mapper::toResp).toList();
+    }
+
     private Specification<Product> makeSpecification(Long categoryId, String nameLike) {
         return (root, query, criteriaBuilder) -> {
 
