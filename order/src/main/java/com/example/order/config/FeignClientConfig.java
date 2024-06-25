@@ -23,7 +23,6 @@ public class FeignClientConfig {
         this.jwtService = jwtService;
     }
 
-
     @Bean
     public Decoder feignDecoder() {
         return new FeignClientDecoder();

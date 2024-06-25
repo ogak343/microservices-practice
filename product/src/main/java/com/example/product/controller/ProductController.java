@@ -1,5 +1,6 @@
 package com.example.product.controller;
 
+import com.example.product.dto.request.OrderCreate;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.dto.request.ProductCreateReq;
 import com.example.product.dto.request.ProductUpdateReq;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @RestController
@@ -29,6 +31,13 @@ public class ProductController {
         log.info("Create product: {}", product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(product));
+    }
+
+    @PostMapping("/order")
+    public ResponseEntity<BigInteger> createOrder(@RequestBody @Valid OrderCreate order) {
+
+        log.info("Create order: {}", order);
+        return ResponseEntity.ok(service.order(order));
     }
 
     @GetMapping("/page")

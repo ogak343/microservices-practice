@@ -19,4 +19,6 @@ public interface CustomerService {
     LoginResp confirm(CustomerConfirmReq customer);
 
     LoginResp login(LoginReq login);
+
+    boolean validate(Long id);
 }

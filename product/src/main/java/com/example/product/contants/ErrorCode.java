@@ -1,5 +1,5 @@
 package com.example.product.contants;
 
 public enum ErrorCode {
-    INVALID_TOKEN
+    INVALID_AMOUNT, INVALID_TOKEN
 }

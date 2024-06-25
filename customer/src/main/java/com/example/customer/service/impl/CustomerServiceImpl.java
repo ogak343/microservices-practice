@@ -87,6 +87,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public boolean validate(Long id) {
+        return false;
+    }
+
+    @Override
     public CustomerResp profile() {
 
         return mapper.toResp(repository.findById(getCustomerId())

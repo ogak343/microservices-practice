@@ -3,6 +3,7 @@ package com.example.order.entity;
 import com.example.order.contants.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 @Table(name = "order")
 @Setter
 @Getter
+@NoArgsConstructor
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,4 +35,8 @@ public class Order {
     private OffsetDateTime lastModifiedAt;
     private OffsetDateTime payedAt;
 
+    public Order(BigInteger totalPrice, Long customerId) {
+        this.totalPrice = totalPrice;
+        this.customerId = customerId;
+    }
 }

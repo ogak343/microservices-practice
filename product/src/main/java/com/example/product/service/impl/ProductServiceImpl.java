@@ -1,6 +1,10 @@
 package com.example.product.service.impl;
 
+import com.example.product.config.exception.CustomException;
+import com.example.product.contants.ErrorCode;
+import com.example.product.dto.request.OrderCreate;
 import com.example.product.dto.request.ProductCreateReq;
+import com.example.product.dto.request.ProductDetailsReq;
 import com.example.product.dto.request.ProductUpdateReq;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.entity.Product;
@@ -16,8 +20,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service(value = "PRODUCT")
 @RequiredArgsConstructor
@@ -69,6 +75,23 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResp> getAllByIds(List<Long> ids) {
         return repository.findAllById(ids).stream().map(mapper::toResp).toList();
+    }
+
+    @Override
+    public BigInteger order(OrderCreate order) {
+
+        var products = repository.findAllByIdIn(order.getProducts().keySet());
+
+        return products.stream()
+                .peek(x -> {
+                    if (x.getQuantity() < order.getProducts().get(x.getId())) {
+                        throw new CustomException(ErrorCode.INVALID_AMOUNT);
+                    } else {
+                        x.setQuantity(x.getQuantity() - order.getProducts().get(x.getId()));
+                    }
+                })
+                .map(Product::getPrice)
+                .reduce(BigInteger.ZERO, BigInteger::add);
     }
 
     private Specification<Product> makeSpecification(Long categoryId, String nameLike) {
