@@ -1,4 +1,4 @@
-package com.example.customer.exception;
+package com.example.customer.config.exception;
 
 import com.example.customer.contants.ErrorMessage;
 

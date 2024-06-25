@@ -1,4 +1,4 @@
-package com.example.product.config;
+package com.example.order.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(servers = {@Server(
         description = "local",
-        url = "http://localhost:8080"
+        url = "http://localhost:8082"
 )})
 @SecurityScheme(name = "bearerAuth",
         scheme = "bearer",
         type = SecuritySchemeType.HTTP,
         bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER)
-public class SwaggerConfiguration {
+public class OpenApiConfiguration {
 }

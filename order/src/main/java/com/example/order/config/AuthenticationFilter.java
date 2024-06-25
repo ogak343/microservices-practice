@@ -1,8 +1,8 @@
-package com.example.product.config;
+package com.example.order.config;
 
-import com.example.product.config.exception.CustomException;
-import com.example.product.contants.ErrorCode;
-import com.example.product.service.JwtService;
+import com.example.order.config.exception.CustomException;
+import com.example.order.contants.ErrorCode;
+import com.example.order.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,11 +48,11 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         if (!header.startsWith("Bearer "))
             throw new CustomException(ErrorCode.INVALID_TOKEN);
 
-        final String token = header.substring(7);
+        final var token = header.substring(7);
 
-        final Long customerId = jwtService.extractId(token);
+        final var customerId = jwtService.extractId(token);
 
-        final String role = jwtService.extractSubject(token);
+        final var role = jwtService.extractSubject(token);
 
         var authentication = new UsernamePasswordAuthenticationToken(customerId, null, getAuthorities(role));
         SecurityContextHolder.getContext().setAuthentication(authentication);

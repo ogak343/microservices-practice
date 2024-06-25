@@ -15,7 +15,4 @@ public interface ProductFeignClient {
     @GetMapping("/page")
     Set<ProductResp> getProductDetails(@RequestParam Set<Long> ids);
 
-
-
-
 }

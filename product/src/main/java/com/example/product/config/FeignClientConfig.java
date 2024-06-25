@@ -1,7 +1,7 @@
-package com.example.order.config;
+package com.example.product.config;
 
-import com.example.order.contants.ClientType;
-import com.example.order.service.JwtService;
+import com.example.product.contants.ClientType;
+import com.example.product.service.JwtService;
 import feign.RequestInterceptor;
 import feign.codec.Decoder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ public class FeignClientConfig {
     public FeignClientConfig(JwtService jwtService) {
         this.jwtService = jwtService;
     }
-
 
     @Bean
     public Decoder feignDecoder() {

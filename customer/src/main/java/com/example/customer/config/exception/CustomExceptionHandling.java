@@ -1,4 +1,4 @@
-package com.example.product.config;
+package com.example.customer.config.exception;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,7 +14,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
-public class CustomExceptionHandler {
+public class CustomExceptionHandling {
+
+    @ExceptionHandler(value = CustomException.class)
+    public ResponseEntity<Object> badReqExceptionHandling(CustomException e) {
+        return ResponseEntity.status(400).body(e.getMessage());
+    }
+
+    @ExceptionHandler(value = EntityNotFoundException.class)
+    public ResponseEntity<Object> EntityNotFoundExceptionHandling(EntityNotFoundException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+    }
+
+    @ExceptionHandler(value = EntityExistsException.class)
+    public ResponseEntity<Object> EntityExistsExceptionHandling(EntityExistsException e) {
+        return ResponseEntity.status(409).body(e.getMessage());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -28,21 +43,10 @@ public class CustomExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error:" + ex.getMessage());
-    }
+    public ResponseEntity<Object> unhandledExceptionHandling(Exception e) {
 
-    @ExceptionHandler(EntityExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<String> handleEntityNotFoundException(EntityExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        return ResponseEntity.status(500).body(e.getMessage());
     }
 }

@@ -9,7 +9,7 @@ import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
 import com.example.customer.dto.resp.LoginResp;
 import com.example.customer.entity.OTP;
-import com.example.customer.exception.CustomException;
+import com.example.customer.config.exception.CustomException;
 import com.example.customer.mapper.CustomerMapper;
 import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;

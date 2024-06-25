@@ -1,7 +1,7 @@
 package com.example.customer.config;
 
 import com.example.customer.contants.ErrorMessage;
-import com.example.customer.exception.CustomException;
+import com.example.customer.config.exception.CustomException;
 import com.example.customer.repository.CustomerRepository;
 import com.example.customer.service.JwtService;
 import jakarta.servlet.FilterChain;

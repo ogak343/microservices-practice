@@ -1,6 +1,23 @@
 spring:
   application:
-    name: order
+    name: order-service
+  config:
+    import: optional:configserver:127.0.0.1:8888
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5434/order_db
+    username: order
+    password: order
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    liquibase-schema: public
+    default-schema: public
+    change-log: classpath:db/changelog/Initializer.xml
+server:
+  port: 8082
 feign:
   clients:
     product:
