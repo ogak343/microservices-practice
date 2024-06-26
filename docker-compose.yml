@@ -9,7 +9,8 @@ services:
       POSTGRES_DB: product_db
       POSTGRES_USER: product
       POSTGRES_PASSWORD: product
-
+    volumes:
+      - VOLUME_PRODUCT_DB:/var/lib/postgresql/data
   customer_db:
     image: postgres:16
     ports:
@@ -18,6 +19,8 @@ services:
       POSTGRES_DB: customer_db
       POSTGRES_USER: customer
       POSTGRES_PASSWORD: customer
+    volumes:
+      - VOLUME_CUSTOMER_DB:/var/lib/postgresql/data
 
   order_db:
     image: postgres:16
@@ -27,6 +30,8 @@ services:
       POSTGRES_DB: order_db
       POSTGRES_USER: order
       POSTGRES_PASSWORD: order
+    volumes:
+      - VOLUME_ORDER_DB:/var/lib/postgresql/data
 
 #  zookeeper:
 #    image: wurstmeister/zookeeper
@@ -45,14 +50,18 @@ services:
 #    networks:
 #      - microservices-network
 
-  zipkin:
-    container_name: zipkin
-    image: openzipkin/zipkin
-    ports:
-      - "9411:9411"
-    networks:
-      - microservices-network
+#  zipkin:
+#    container_name: zipkin
+#    image: openzipkin/zipkin
+#    ports:
+#      - "9411:9411"
+#    networks:
+#      - microservices-network
 
 networks:
   microservices-network:
     driver: bridge
+volumes:
+  VOLUME_PRODUCT_DB:
+  VOLUME_CUSTOMER_DB:
+  VOLUME_ORDER_DB:

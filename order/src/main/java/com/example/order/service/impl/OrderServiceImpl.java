@@ -32,9 +32,9 @@ public class OrderServiceImpl implements OrderService {
 
         var customer = customerClient.validateCustomer();
 
-        var price = productClient.orderProducts(dto);
+        var orderedProducts = productClient.orderProducts(dto);
 
-        var order = new Order(price, customer.getId());
+        var order = new Order(orderedProducts.getTotalPrice(), customer.getId());
 
         var details = dto.getProducts().entrySet().stream()
                 .map(entry -> new ProductDetails(entry.getKey(), entry.getValue()))
@@ -42,8 +42,13 @@ public class OrderServiceImpl implements OrderService {
         order.setProductDetails(details);
 
         order.setStatus(Status.WAITING_FOR_PAYMENT);
+        order.setTotalPrice(orderedProducts.getTotalPrice());
         order.getProductDetails().forEach(x -> x.setOrder(order));
-        return mapper.toResp(repository.save(order));
+
+        var response = mapper.toResp(repository.save(order));
+        response.setProductDetails(orderedProducts.getProducts());
+
+        return response;
     }
 
     @Override

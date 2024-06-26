@@ -1,13 +1,13 @@
 package com.example.product.service;
 
 import com.example.product.dto.request.OrderCreate;
+import com.example.product.dto.resp.OrderedProductResp;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.dto.request.ProductCreateReq;
 import com.example.product.dto.request.ProductUpdateReq;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.util.List;
 
 public interface ProductService {
@@ -25,5 +25,5 @@ public interface ProductService {
     List<ProductResp> getAllByIds(List<Long> ids);
 
     @Transactional
-    BigInteger order(OrderCreate order);
+    OrderedProductResp order(OrderCreate order);
 }

@@ -5,6 +5,7 @@ import com.example.product.contants.ErrorCode;
 import com.example.product.dto.request.OrderCreate;
 import com.example.product.dto.request.ProductCreateReq;
 import com.example.product.dto.request.ProductUpdateReq;
+import com.example.product.dto.resp.OrderedProductResp;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.entity.Product;
 import com.example.product.mapper.ProductMapper;
@@ -78,25 +79,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public BigInteger order(OrderCreate order) {
+    public OrderedProductResp order(OrderCreate order) {
 
         var products = repository.findAllByIdIn(order.getProducts().keySet());
-
-        var price = products.stream()
-                .peek(x -> {
-                    if (x.getQuantity() < order.getProducts().get(x.getId())) {
+        var response = new OrderedProductResp();
+        products = products.stream()
+                .peek(product -> {
+                    if (product.getQuantity() < order.getProducts().get(product.getId())) {
                         throw new CustomException(ErrorCode.INVALID_AMOUNT);
                     } else {
-                        x.setQuantity(x.getQuantity() - order.getProducts().get(x.getId()));
+                        var quantity = order.getProducts().get(product.getId());
+                        product.setQuantity(product.getQuantity() - order.getProducts().get(product.getId()));
+                        response.setTotalPrice(response.getTotalPrice()
+                                .add(product.getPrice().multiply(BigInteger.valueOf(quantity))));
                     }
-                })
-                .map(product -> product.getPrice().multiply(BigInteger.valueOf(order.getProducts().get(product.getId()))))
-                .reduce(BigInteger.ZERO, BigInteger::add);
+                }).toList();
 
         repository.saveAll(products);
-
-        log.info("price : {}", price);
-        return price;
+        response.setProducts(products.stream().map(product ->
+                mapper.toOrderedProduct(product, order.getProducts().get(product.getId()))).toList());
+        return response;
     }
 
     private Specification<Product> makeSpecification(Long categoryId, String nameLike) {

@@ -1,6 +1,7 @@
 package com.example.product.controller;
 
 import com.example.product.dto.request.OrderCreate;
+import com.example.product.dto.resp.OrderedProductResp;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.dto.request.ProductCreateReq;
 import com.example.product.dto.request.ProductUpdateReq;
@@ -37,7 +38,7 @@ public class ProductController {
 
     @PostMapping("/order")
     @PreAuthorize(value = "hasAuthority('ROLE_SERVICE')")
-    public ResponseEntity<BigInteger> createOrder(@RequestBody @Valid OrderCreate order) {
+    public ResponseEntity<OrderedProductResp> createOrder(@RequestBody @Valid OrderCreate order) {
 
         log.info("Create order: {}", order);
         return ResponseEntity.ok(service.order(order));
