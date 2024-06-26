@@ -16,6 +16,11 @@ spring:
     default-schema: public
     liquibase-schema: public
     change-log: classpath:db/changelog/Initializer.xml
+  cloud:
+    openfeign:
+      autoconfiguration:
+        jackson:
+          enabled: true
 server:
   port: 8081
 

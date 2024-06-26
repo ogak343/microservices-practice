@@ -6,6 +6,8 @@ import com.example.product.dto.resp.ProductResp;
 import com.example.product.entity.Product;
 import org.mapstruct.*;
 
+import java.math.BigInteger;
+
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         implementationName = "ProductMapperImpl")
@@ -16,4 +18,5 @@ public interface ProductMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void update(@MappingTarget Product entity, ProductUpdateReq product);
+
 }

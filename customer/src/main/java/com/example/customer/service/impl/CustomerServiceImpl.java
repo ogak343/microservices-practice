@@ -93,8 +93,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResp profile() {
-
-        return mapper.toResp(repository.findById(getCustomerId())
+        var customer = getCustomerId();
+        return mapper.toResp(repository.findById(customer)
                 .orElseThrow(() -> new EntityNotFoundException("Customer not found")));
     }
 

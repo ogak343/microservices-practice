@@ -9,16 +9,27 @@ spring:
     password: order
     driver-class-name: org.postgresql.Driver
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: none
   liquibase:
     liquibase-schema: public
     default-schema: public
     change-log: classpath:db/changelog/Initializer.xml
+  cloud:
+    openfeign:
+      autoconfiguration:
+        jackson:
+          enabled: true
 server:
   port: 8082
 feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+        readTimeout: 60000
+        connectTimeout: 5000
   clients:
     product:
       name: product-client
@@ -29,6 +40,7 @@ feign:
 logging:
   level:
     com.example.order.client: DEBUG
+    feign: debug
 
 jwt:
   secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711

@@ -90,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
                         x.setQuantity(x.getQuantity() - order.getProducts().get(x.getId()));
                     }
                 })
-                .map(Product::getPrice)
+                .map(product -> product.getPrice().multiply(BigInteger.valueOf(order.getProducts().get(product.getId()))))
                 .reduce(BigInteger.ZERO, BigInteger::add);
 
         repository.saveAll(products);

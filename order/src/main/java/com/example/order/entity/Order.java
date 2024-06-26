@@ -9,10 +9,11 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "order")
+@Table(name = "order", schema = "public")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -20,14 +21,14 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany
-    @JoinTable(name = "product_details", joinColumns = @JoinColumn(name = "order_id"))
-    private Set<ProductDetails> productDetails;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProductDetails> productDetails = new HashSet<>();
     @Column(nullable = false)
     private BigInteger totalPrice;
     @Column(nullable = false)
     private Long customerId;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
     @CreationTimestamp
     @Column(nullable = false)

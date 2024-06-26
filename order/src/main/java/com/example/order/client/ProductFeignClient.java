@@ -23,5 +23,5 @@ public interface ProductFeignClient {
     Set<ProductResp> productDetails(@RequestParam Set<Long> ids);
 
     @PostMapping("/order")
-    ResponseEntity<BigInteger> orderProducts(@RequestBody OrderCreate orderCreate);
+    BigInteger orderProducts(@RequestBody OrderCreate orderCreate);
 }
