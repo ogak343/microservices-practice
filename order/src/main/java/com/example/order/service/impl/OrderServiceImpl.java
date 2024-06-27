@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -65,9 +66,15 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
         var products = productClient.productDetails(order.getProductDetails()
-                .stream().map(ProductDetails::getId).collect(Collectors.toSet()));
+                .stream().map(ProductDetails::getProductId).collect(Collectors.toSet()));
 
         var resp = mapper.toResp(order);
+
+        Map<Long, Integer> map = order.getProductDetails()
+                .stream().collect(Collectors.toMap(ProductDetails::getProductId, ProductDetails::getQuantity));
+
+        products.forEach(productResp -> productResp.setQuantity(map.get(productResp.getId())));
+
         resp.setProductDetails(products);
 
         return resp;

@@ -18,7 +18,7 @@ import java.util.Set;
         configuration = FeignClientConfig.class)
 public interface ProductFeignClient {
 
-    @GetMapping("/page")
+    @GetMapping("/byIds")
     Set<ProductResp> productDetails(@RequestParam Set<Long> ids);
 
     @PostMapping("/order")
