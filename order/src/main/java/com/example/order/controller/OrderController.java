@@ -6,6 +6,8 @@ import com.example.order.dto.resp.OrderResp;
 import com.example.order.service.OrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,10 +46,10 @@ public class OrderController {
     }
 
     @GetMapping("/myOrders")
-    public ResponseEntity<Page<OrderResp>> getMyOrders(@RequestParam(name = "page") Integer page,
-                                                       @RequestParam(name = "size") Integer size) {
+    public ResponseEntity<Page<OrderResp>> getMyOrders(@RequestParam(name = "page") @Min(1) Integer page,
+                                                       @RequestParam(name = "size") @Min(1) @Max(10) Integer size) {
 
         log.info("Get orders! page: {}, size {}", page, size);
-        return ResponseEntity.ok(service.getPage(page, size));
+        return ResponseEntity.ok(service.getPage(page - 1, size));
     }
 }

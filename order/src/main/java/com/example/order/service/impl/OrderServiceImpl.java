@@ -14,6 +14,7 @@ import com.example.order.service.OrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -82,7 +83,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<OrderResp> getPage(Integer page, Integer size) {
-        //TODO
-        return null;
+
+        //TODO not detailed
+
+        return repository.findAll(PageRequest.of(page, size)).map(mapper::toResp);
+
     }
 }
