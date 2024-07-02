@@ -21,9 +21,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service(value = "PRODUCT")
 @RequiredArgsConstructor
@@ -81,24 +81,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public OrderedProductResp order(OrderCreate order) {
 
-        var products = repository.findAllByIdIn(order.getProducts().keySet());
-        var response = new OrderedProductResp();
+        var products = repository.findAllById(order.getProducts().keySet());
+
+        if (!Objects.equals(products.size(), order.getProducts().size()))
+            throw new CustomException(ErrorCode.NOT_ALL_PRODUCTS_FOUND);
+
         products = products.stream()
                 .peek(product -> {
                     if (product.getQuantity() < order.getProducts().get(product.getId())) {
-                        throw new CustomException(ErrorCode.INVALID_AMOUNT);
-                    } else {
-                        var quantity = order.getProducts().get(product.getId());
-                        product.setQuantity(product.getQuantity() - order.getProducts().get(product.getId()));
-                        response.setTotalPrice(response.getTotalPrice()
-                                .add(product.getPrice().multiply(BigInteger.valueOf(quantity))));
+                        throw new CustomException(ErrorCode.INSUFFICIENT_QUANTITY);
                     }
+                    product.setQuantity(product.getQuantity() - order.getProducts().get(product.getId()));
                 }).toList();
 
         repository.saveAll(products);
-        response.setProducts(products.stream().map(product ->
+        return new OrderedProductResp(products.stream().map(product ->
                 mapper.toOrderedProduct(product, order.getProducts().get(product.getId()))).toList());
-        return response;
     }
 
     private Specification<Product> makeSpecification(Long categoryId, String nameLike) {

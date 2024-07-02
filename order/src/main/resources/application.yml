@@ -24,12 +24,6 @@ spring:
 server:
   port: 8082
 feign:
-  client:
-    config:
-      default:
-        loggerLevel: full
-        readTimeout: 60000
-        connectTimeout: 5000
   clients:
     product:
       name: product-client
@@ -37,10 +31,9 @@ feign:
     customer:
       name: customer-client
       url: http://127.0.0.1:8081
-logging:
-  level:
-    com.example.order.client: DEBUG
-    feign: debug
+kafka:
+  topic:
+    orderCreation: orderCreationTopic
 
 jwt:
   secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711

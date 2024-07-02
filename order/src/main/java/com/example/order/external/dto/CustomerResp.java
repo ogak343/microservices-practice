@@ -1,4 +1,4 @@
-package com.example.order.client.dto;
+package com.example.order.external.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

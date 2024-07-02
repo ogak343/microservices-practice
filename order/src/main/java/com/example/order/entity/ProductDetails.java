@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigInteger;
+
 @Entity
 @Table(name = "product_details")
 @Setter
@@ -17,13 +19,11 @@ public class ProductDetails {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
+    private String name;
+    private String description;
+    private BigInteger price;
     @Column(nullable = false)
     private Long productId;
     @Column(nullable = false)
     private int quantity;
-
-    public ProductDetails(Long productId, int quantity) {
-        this.productId = productId;
-        this.quantity = quantity;
-    }
 }

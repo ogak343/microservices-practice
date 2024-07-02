@@ -1,6 +1,6 @@
-package com.example.order.client;
+package com.example.order.external.client;
 
-import com.example.order.client.dto.OrderedProductResp;
+import com.example.order.external.dto.OrderedProductResp;
 import com.example.order.config.FeignClientConfig;
 import com.example.order.dto.req.OrderCreate;
 import com.example.order.dto.resp.ProductResp;

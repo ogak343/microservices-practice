@@ -1,14 +1,12 @@
-package com.example.order.client.dto;
+package com.example.order.external.dto;
 
 import com.example.order.dto.resp.ProductResp;
 
 import lombok.Data;
 
-import java.math.BigInteger;
 import java.util.Set;
 
 @Data
 public class OrderedProductResp {
-    private BigInteger totalPrice;
     private Set<ProductResp> products;
 }

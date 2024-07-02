@@ -1,6 +1,6 @@
-package com.example.order.client;
+package com.example.order.external.client;
 
-import com.example.order.client.dto.CustomerResp;
+import com.example.order.external.dto.CustomerResp;
 import com.example.order.config.FeignClientConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
