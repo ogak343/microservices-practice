@@ -11,9 +11,9 @@ public class KafkaProducer {
     @Value("${kafka.topic.orderCreation}")
     private String ORDER_CREATION_TOPIC;
 
-    private final KafkaTemplate<String, OrderCreatePublishDto> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public KafkaProducer(KafkaTemplate<String, OrderCreatePublishDto> kafkaTemplate) {
+    public KafkaProducer(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 

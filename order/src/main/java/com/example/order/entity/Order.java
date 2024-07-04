@@ -21,7 +21,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<ProductDetails> productDetails = new HashSet<>();
     @Column(nullable = false)
     private BigInteger totalPrice;
@@ -35,9 +35,4 @@ public class Order {
     private OffsetDateTime createdAt;
     private OffsetDateTime lastModifiedAt;
     private OffsetDateTime payedAt;
-
-    public Order(BigInteger totalPrice, Long customerId) {
-        this.totalPrice = totalPrice;
-        this.customerId = customerId;
-    }
 }

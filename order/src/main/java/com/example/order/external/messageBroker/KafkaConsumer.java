@@ -14,7 +14,7 @@ public class KafkaConsumer {
         this.orderService = orderService;
     }
 
-    @KafkaListener(topics = {"${kafka.topic.orderCreation}"}, groupId = "firstGroup")
+    @KafkaListener(topics = {"${kafka.topic.orderCreation}"}, groupId = "order-service")
     public void listen(OrderCreatePublishDto dto) {
         orderService.save(dto);
     }

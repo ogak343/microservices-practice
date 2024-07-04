@@ -2,6 +2,7 @@ package com.example.order.controller;
 
 import com.example.order.dto.req.OrderCreate;
 import com.example.order.dto.req.OrderUpdate;
+import com.example.order.dto.resp.InfoResp;
 import com.example.order.dto.resp.OrderResp;
 import com.example.order.service.OrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,7 +26,7 @@ public class OrderController {
     private final OrderService service;
 
     @PostMapping
-    public ResponseEntity<OrderResp> create(@RequestBody @Valid OrderCreate dto) {
+    public ResponseEntity<InfoResp> create(@RequestBody @Valid OrderCreate dto) {
 
         log.info("Create order: {}", dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
