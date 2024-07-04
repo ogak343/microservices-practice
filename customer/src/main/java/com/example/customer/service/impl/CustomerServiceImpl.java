@@ -15,7 +15,6 @@ import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;
 import com.example.customer.service.CustomerService;
 import com.example.customer.service.JwtService;
-import com.example.customer.service.NotificationService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository repository;
     private final CustomerMapper mapper;
     private final OTPRepository otpRepository;
-    private final NotificationService notificationService;
+    private final KafkaPublisher kafkaPublisher;
     private final BCryptPasswordEncoder encoder;
     private final JwtService jwtService;
 
@@ -49,7 +48,7 @@ public class CustomerServiceImpl implements CustomerService {
         customer = repository.save(customer);
 
         var otp = otpRepository.save(new OTP(customer));
-        notificationService.sendOTP(otp);
+        kafkaPublisher.sendOTP(otp);
 
         return otp.getId();
     }

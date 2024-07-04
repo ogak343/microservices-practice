@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: notification-service
+  mail:
+    host: smtp@gmail.com
+    port: 465
+    username: khamdamov343@gmail.com
+    password: lmqptmcnehcfdmoo
+    protocol: smtp
+    default-encoding: UTF-8
+server:
+  port: 8090
+
+kafka:
+  topic:
+    otp: otp
