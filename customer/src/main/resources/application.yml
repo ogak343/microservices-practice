@@ -26,7 +26,7 @@ server:
 
 kafka:
   topic:
-    otp: otp
+    otp: otpDeliveryTopic
 
 jwt:
   expiresIn: 30

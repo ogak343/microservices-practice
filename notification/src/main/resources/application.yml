@@ -14,7 +14,7 @@ server:
 
 kafka:
   topic:
-    otp: otp
+    otp: otpDeliveryTopic
 mail:
   subject:
     otp: "Account confirmation"

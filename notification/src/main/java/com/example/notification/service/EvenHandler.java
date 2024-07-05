@@ -17,7 +17,7 @@ public class EvenHandler {
 
     private final Map<String, NotificationService> notificationService;
 
-    @KafkaListener(topics = {"${kafka.topic.otp}"}, groupId = "notification")
+    @KafkaListener(topics = {"${kafka.topic.otp}"}, groupId = "notification-group")
     public void listen(NotificationDto dto) {
 
         validateDto(dto);
