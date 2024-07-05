@@ -26,7 +26,7 @@ public class EvenHandler {
     }
 
     private void validateDto(NotificationDto dto) {
-        if (Arrays.stream(dto.getClass().getDeclaredFields()).allMatch(Objects::nonNull)) {
+        if (Arrays.stream(dto.getClass().getDeclaredFields()).anyMatch(Objects::isNull)) {
             log.error("Invalid dto: {}, missing required fields", dto);
             throw new RuntimeException();
         }

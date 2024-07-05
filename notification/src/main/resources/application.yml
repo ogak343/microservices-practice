@@ -2,11 +2,11 @@ spring:
   application:
     name: notification-service
   mail:
-    host: smtp@gmail.com
+    host: smtp.gmail.com
     port: 465
     username: khamdamov343@gmail.com
     password: lmqptmcnehcfdmoo
-    protocol: smtp
+    protocol: smtps
     default-encoding: UTF-8
 server:
   port: 8090
@@ -14,3 +14,6 @@ server:
 kafka:
   topic:
     otp: otp
+mail:
+  subject:
+    otp: "Account confirmation"
