@@ -4,5 +4,5 @@ public enum Status {
     IN_CREATION_PROCESS,
     WAITING_FOR_PAYMENT,
     PAID,
-    CANCELLED
+    IN_UPDATE_PROCESS, CANCELLED
 }

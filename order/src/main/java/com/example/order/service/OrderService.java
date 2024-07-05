@@ -12,7 +12,8 @@ public interface OrderService {
     @Transactional
     InfoResp create(OrderCreate dto);
 
-    OrderResp update(OrderUpdate dto);
+    @Transactional
+    InfoResp update(OrderUpdate dto);
 
     OrderResp get(Long id);
 

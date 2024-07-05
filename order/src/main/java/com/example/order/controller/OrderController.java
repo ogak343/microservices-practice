@@ -33,7 +33,7 @@ public class OrderController {
     }
 
     @PutMapping
-    public ResponseEntity<OrderResp> update(@RequestBody @Valid OrderUpdate dto) {
+    public ResponseEntity<InfoResp> update(@RequestBody @Valid OrderUpdate dto) {
 
         log.info("Update order: {}", dto);
         return ResponseEntity.ok(service.update(dto));

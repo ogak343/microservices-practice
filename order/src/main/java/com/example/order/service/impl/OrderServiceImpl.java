@@ -1,5 +1,6 @@
 package com.example.order.service.impl;
 
+import com.example.order.contants.Operation;
 import com.example.order.dto.resp.InfoResp;
 import com.example.order.external.client.CustomerFeignClient;
 import com.example.order.external.client.ProductFeignClient;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,10 +48,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResp update(OrderUpdate dto) {
+    public InfoResp update(OrderUpdate dto) {
 
-        //TODO
-        return null;
+        var order = repository.findById(dto.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+
+        var details = order.getProductDetails().stream()
+                .collect(Collectors.toMap(ProductDetails::getId, detail -> detail));
+
+        dto.getProductDetails().forEach(detail -> {
+            if (details.get(detail.getDetailId()) == null) {
+                throw new EntityNotFoundException("Invalid product detail specified!");
+            }
+            if (detail.getOperation().equals(Operation.SUBTRACT)
+                    && details.get(detail.getDetailId()).getQuantity() < detail.getQuantity()) {
+                throw new EntityNotFoundException("Invalid product detail specified!");
+            }
+        });
+
+        kafkaProducer.publishOrderModification(dto);
+        return new InfoResp(200, String.format(Status.IN_UPDATE_PROCESS.name()));
     }
 
     @Override

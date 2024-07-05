@@ -18,9 +18,6 @@ public class OrderResp {
     private OffsetDateTime payedAt;
 
     public OrderResp() {
-    }
 
-    public OrderResp(Status status) {
-        this.status = status;
     }
 }
