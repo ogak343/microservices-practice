@@ -31,7 +31,7 @@ public class CustomExceptionHandler {
 
         var code = ex.getErrorCode().getCode();
 
-        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "An Exception occurred", ex.getErrorCode().name()));
+        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Service error", ex.getErrorCode().name()));
 
     }
 

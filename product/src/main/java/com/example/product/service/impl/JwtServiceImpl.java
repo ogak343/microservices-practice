@@ -1,6 +1,5 @@
 package com.example.product.service.impl;
 
-import com.example.product.contants.ClientType;
 import com.example.product.service.JwtService;
 
 import io.jsonwebtoken.Claims;
@@ -26,11 +25,6 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String extractSubject(String token) {
         return extractClaims(token, Claims::getSubject);
-    }
-
-    @Override
-    public String generateToken(Long customerId, ClientType clientType) {
-        return "";
     }
 
     private <T> T extractClaims(String token, Function<Claims, T> claimsFunction) {

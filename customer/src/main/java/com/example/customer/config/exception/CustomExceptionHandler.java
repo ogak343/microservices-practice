@@ -1,6 +1,5 @@
 package com.example.customer.config.exception;
 
-import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -42,13 +41,6 @@ public class CustomExceptionHandler {
     public ResponseEntity<ErrorResponse<String>> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse<>(500, "Internal server error:", ex.getMessage()));
-    }
-
-    @ExceptionHandler(FeignException.class)
-    public ResponseEntity<ErrorResponse<String>> handleClientException(FeignException ex) {
-
-        var code = ex.status();
-        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Client error", ex.getMessage()));
     }
 }
 

@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 
 import java.lang.reflect.Type;
 
-
 public class FeignClientDecoder implements Decoder {
 
     @Override
