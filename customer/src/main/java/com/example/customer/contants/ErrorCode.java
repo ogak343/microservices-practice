@@ -3,7 +3,7 @@ package com.example.customer.contants;
 import lombok.Getter;
 
 @Getter
-public enum ErrorMessage {
+public enum ErrorCode {
     WRONG_OTP_CODE(400),
     WRONG_PASSWORD(400),
     INVALID_TOKEN(400),
@@ -12,7 +12,8 @@ public enum ErrorMessage {
 
     private int code;
 
-    ErrorMessage(int code) {
+    ErrorCode(int code) {
         this.code = code;
     }
+
 }

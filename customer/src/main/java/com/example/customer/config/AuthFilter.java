@@ -1,6 +1,6 @@
 package com.example.customer.config;
 
-import com.example.customer.contants.ErrorMessage;
+import com.example.customer.contants.ErrorCode;
 import com.example.customer.config.exception.CustomException;
 import com.example.customer.repository.CustomerRepository;
 import com.example.customer.service.JwtService;
@@ -51,14 +51,14 @@ public class AuthFilter extends OncePerRequestFilter {
     private void authenticate(String header) {
 
         if (!header.startsWith("Bearer "))
-            throw new CustomException(ErrorMessage.INVALID_TOKEN);
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
 
         final var token = header.substring(7);
 
         final var customerId = jwtService.extractId(token);
 
         if (!repository.existsByIdAndActiveTrue(customerId))
-            throw new CustomException(ErrorMessage.WRONG_CREDENTIALS);
+            throw new CustomException(ErrorCode.WRONG_CREDENTIALS);
 
         final var role = jwtService.extractSubject(token);
 

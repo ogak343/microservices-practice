@@ -12,7 +12,6 @@ import com.example.product.mapper.ProductMapper;
 import com.example.product.repository.CategoryRepository;
 import com.example.product.repository.ProductRepository;
 import com.example.product.service.ProductService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
         var entity = mapper.toEntity(product);
 
         entity.setCategory(categoryRepository.findById(product.getCategoryId())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found")));
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND)));
 
         return mapper.toResp(repository.save(entity));
     }
@@ -48,14 +47,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResp get(Long id) {
         return mapper.toResp(repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found")));
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)));
     }
 
     @Override
     public ProductResp update(ProductUpdateReq product) {
 
         var entity = repository.findById(product.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         mapper.update(entity, product);
         return mapper.toResp(repository.save(entity));

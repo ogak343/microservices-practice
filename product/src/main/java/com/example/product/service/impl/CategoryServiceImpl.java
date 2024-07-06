@@ -1,13 +1,13 @@
 package com.example.product.service.impl;
 
+import com.example.product.config.exception.CustomException;
+import com.example.product.contants.ErrorCode;
 import com.example.product.dto.request.CategoryCreateReq;
 import com.example.product.dto.request.CategoryUpdateReq;
 import com.example.product.dto.resp.CategoryResp;
 import com.example.product.mapper.CategoryMapper;
 import com.example.product.repository.CategoryRepository;
 import com.example.product.service.CategoryService;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +23,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResp create(CategoryCreateReq category) {
 
-        if (repository.existsByName(category.getName()))
-            throw new EntityExistsException("Category already exists");
+        if (repository.existsByName(category.getName())) {
+            throw new CustomException(ErrorCode.CATEGORY_EXISTS);
+        }
 
         var entity = repository.save(mapper.toEntity(category));
 
@@ -34,14 +35,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResp get(Long id) {
         return mapper.toResp(repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found")));
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND)));
     }
 
     @Override
     public CategoryResp update(CategoryUpdateReq category) {
 
         var entity = repository.findById(category.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_FOUND));
 
         mapper.update(entity, category);
 

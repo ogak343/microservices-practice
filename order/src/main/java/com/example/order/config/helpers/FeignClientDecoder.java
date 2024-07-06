@@ -1,30 +1,23 @@
 package com.example.order.config.helpers;
 
-import com.example.order.config.exception.CustomException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.order.config.exception.ClientException;
 import feign.FeignException;
 import feign.Response;
 import feign.codec.Decoder;
-import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 
 
 public class FeignClientDecoder implements Decoder {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
+    public Object decode(Response response, Type type) throws FeignException {
 
-        if (response.status() >= 200 && response.status() <= 299) {
-            return objectMapper.readValue(response.body().asInputStream(), objectMapper.constructType(type));
-        } else if (response.status() == 400) {
-            throw new CustomException(response.body().toString());
-        } else if (response.status() == 404) {
-            throw new EntityNotFoundException(response.body().toString());
+        if (HttpStatus.valueOf(response.status()).is2xxSuccessful()) {
+            return response;
         }
-        throw new RuntimeException("Unexpected response status: " + response.status());
+
+        throw new ClientException(response.status(), response.body().toString());
     }
 }

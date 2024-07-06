@@ -1,5 +1,6 @@
-package com.example.product.config.exception;
+package com.example.customer.config.exception;
 
+import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 @ControllerAdvice
 public class CustomExceptionHandler {
@@ -31,13 +33,22 @@ public class CustomExceptionHandler {
 
         var code = ex.getErrorCode().getCode();
 
-        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "An Exception occurred", ex.getErrorCode().name()));
+        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Service error", ex.getErrorCode().name()));
 
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error:" + ex.getMessage());
+    public ResponseEntity<ErrorResponse<String>> handleGeneralException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse<>(500, "Internal server error:", ex.getMessage()));
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse<String>> handleClientException(FeignException ex) {
+
+        var code = ex.status();
+        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Client error", ex.getMessage()));
     }
 }
+

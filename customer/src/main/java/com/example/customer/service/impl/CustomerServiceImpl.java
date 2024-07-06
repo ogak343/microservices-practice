@@ -1,6 +1,6 @@
 package com.example.customer.service.impl;
 
-import com.example.customer.contants.ErrorMessage;
+import com.example.customer.contants.ErrorCode;
 import com.example.customer.contants.ClientType;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
@@ -60,10 +60,10 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new EntityNotFoundException("Invalid OTP"));
 
         if (otp.getExpiredAt().isBefore(OffsetDateTime.now()))
-            throw new CustomException(ErrorMessage.OTP_EXPIRED);
+            throw new CustomException(ErrorCode.OTP_EXPIRED);
 
         if (!Objects.equals(otp.getCode(), confirmReq.getCode()))
-            throw new CustomException(ErrorMessage.WRONG_OTP_CODE);
+            throw new CustomException(ErrorCode.WRONG_OTP_CODE);
 
         var customer = otp.getCustomer();
         customer.setActive(true);
@@ -80,7 +80,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new EntityNotFoundException("Customer not found"));
 
         if (!encoder.matches(login.getPassword(), customer.getPassword()))
-            throw new CustomException(ErrorMessage.WRONG_PASSWORD);
+            throw new CustomException(ErrorCode.WRONG_PASSWORD);
 
         return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
     }
@@ -115,7 +115,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         } catch (ClassCastException e) {
-            throw new CustomException(ErrorMessage.INVALID_TOKEN);
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -124,6 +124,6 @@ public class CustomerServiceImpl implements CustomerService {
         var customerId = getCustomerId();
 
         if (!Objects.equals(customerId, id))
-            throw new CustomException(ErrorMessage.WRONG_CREDENTIALS);
+            throw new CustomException(ErrorCode.WRONG_CREDENTIALS);
     }
 }

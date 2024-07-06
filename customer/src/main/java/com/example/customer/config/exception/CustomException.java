@@ -1,14 +1,16 @@
 package com.example.customer.config.exception;
 
-import com.example.customer.contants.ErrorMessage;
+import com.example.customer.contants.ErrorCode;
+import lombok.Getter;
 
+@Getter
 public class CustomException extends RuntimeException {
 
-    public CustomException(ErrorMessage errorMessage) {
-        super(errorMessage.name());
+    private final ErrorCode errorCode;
+
+    public CustomException(ErrorCode errorCode) {
+        super(errorCode.name());
+        this.errorCode = errorCode;
     }
 
-    public CustomException(String string) {
-        super(string);
-    }
 }
