@@ -4,11 +4,13 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-    WRONG_OTP_CODE(400),
-    WRONG_PASSWORD(400),
-    INVALID_TOKEN(400),
-    WRONG_CREDENTIALS(400),
-    OTP_EXPIRED(400);
+    INVALID_OTP(400),
+    WRONG_OTP_CODE(401),
+    INVALID_TOKEN(401),
+    OTP_EXPIRED(401),
+    WRONG_PASSWORD(403),
+    WRONG_CREDENTIALS(403),
+    CUSTOMER_NOT_FOUND(404);
 
     private int code;
 

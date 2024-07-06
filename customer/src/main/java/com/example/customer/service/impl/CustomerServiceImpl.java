@@ -15,8 +15,6 @@ import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;
 import com.example.customer.service.CustomerService;
 import com.example.customer.service.JwtService;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,7 +38,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Long create(CustomerCreateReq create) {
 
         if (repository.existsByEmail(create.getEmail()))
-            throw new EntityExistsException("Customer with this email already exists");
+            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
 
         var customer = mapper.toEntity(create);
         customer.setPassword(encoder.encode(create.getPassword()));
@@ -57,7 +55,7 @@ public class CustomerServiceImpl implements CustomerService {
     public LoginResp confirm(CustomerConfirmReq confirmReq) {
 
         var otp = otpRepository.findById(confirmReq.getOtpId())
-                .orElseThrow(() -> new EntityNotFoundException("Invalid OTP"));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_OTP));
 
         if (otp.getExpiredAt().isBefore(OffsetDateTime.now()))
             throw new CustomException(ErrorCode.OTP_EXPIRED);
@@ -77,7 +75,7 @@ public class CustomerServiceImpl implements CustomerService {
     public LoginResp login(LoginReq login) {
 
         var customer = repository.findByEmailAndActiveTrue(login.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         if (!encoder.matches(login.getPassword(), customer.getPassword()))
             throw new CustomException(ErrorCode.WRONG_PASSWORD);
@@ -89,7 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResp profile() {
         var customer = getCustomerId();
         return mapper.toResp(repository.findById(customer)
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found")));
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND)));
     }
 
     @Override
@@ -98,7 +96,7 @@ public class CustomerServiceImpl implements CustomerService {
         validateAccess(updateDto.getId());
 
         var entity = repository.findById(updateDto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         mapper.update(entity, updateDto);
 

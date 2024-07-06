@@ -1,7 +1,8 @@
 package com.example.order.external.client;
 
+import com.example.order.config.helpers.FeignClientDecoder;
 import com.example.order.external.dto.OrderedProductResp;
-import com.example.order.config.FeignClientConfig;
+import com.example.order.config.helpers.FeignClientInterceptor;
 import com.example.order.dto.req.OrderCreate;
 import com.example.order.dto.resp.ProductResp;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -15,7 +16,7 @@ import java.util.Set;
 @FeignClient(name = "${feign.clients.product.name}",
         url = "${feign.clients.product.url}",
         path = "/products",
-        configuration = FeignClientConfig.class)
+        configuration = {FeignClientInterceptor.class, FeignClientDecoder.class})
 public interface ProductFeignClient {
 
     @GetMapping("/byIds")

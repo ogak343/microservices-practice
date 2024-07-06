@@ -1,5 +1,7 @@
 package com.example.order.service.impl;
 
+import com.example.order.config.exception.CustomException;
+import com.example.order.contants.ErrorCode;
 import com.example.order.contants.Operation;
 import com.example.order.dto.resp.InfoResp;
 import com.example.order.external.client.CustomerFeignClient;
@@ -14,7 +16,6 @@ import com.example.order.external.messageBroker.dto.OrderCreatePublishDto;
 import com.example.order.mapper.OrderMapper;
 import com.example.order.repository.OrderRepository;
 import com.example.order.service.OrderService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,18 +52,18 @@ public class OrderServiceImpl implements OrderService {
     public InfoResp update(OrderUpdate dto) {
 
         var order = repository.findById(dto.getOrderId())
-                .orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         var details = order.getProductDetails().stream()
                 .collect(Collectors.toMap(ProductDetails::getId, detail -> detail));
 
         dto.getProductDetails().forEach(detail -> {
             if (details.get(detail.getDetailId()) == null) {
-                throw new EntityNotFoundException("Invalid product detail specified!");
+                throw new CustomException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
             }
             if (detail.getOperation().equals(Operation.SUBTRACT)
                     && details.get(detail.getDetailId()).getQuantity() < detail.getQuantity()) {
-                throw new EntityNotFoundException("Invalid product detail specified!");
+                throw new CustomException(ErrorCode.INVALID_AMOUNT_SPECIFIED);
             }
         });
 
@@ -73,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResp get(Long id) {
         return mapper.toResp(repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found")));
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND)));
     }
 
     @Override
