@@ -16,9 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigInteger;
-import java.util.List;
-
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -36,12 +33,12 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(product));
     }
 
-    @PostMapping("/order")
+    @PostMapping("/order/create")
     @PreAuthorize(value = "hasAuthority('ROLE_SERVICE')")
     public ResponseEntity<OrderedProductResp> createOrder(@RequestBody @Valid OrderCreate order) {
 
         log.info("Create order: {}", order);
-        return ResponseEntity.ok(service.order(order));
+        return ResponseEntity.ok(service.createOrder(order));
     }
 
     @GetMapping("/page")
@@ -54,15 +51,6 @@ public class ProductController {
 
         return ResponseEntity.ok(service.search(page, size, categoryId, nameLike));
     }
-
-    @GetMapping("/byIds")
-    @PreAuthorize(value = "hasAnyAuthority('ROLE_SERVICE')")
-    public ResponseEntity<List<ProductResp>> getAll(@RequestParam List<Long> ids) {
-
-        log.info("Get product by ids: {}", ids);
-        return ResponseEntity.ok(service.getAllByIds(ids));
-    }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResp> get(@PathVariable Long id) {

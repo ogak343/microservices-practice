@@ -29,7 +29,7 @@ public class Order {
     private Long customerId;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private Status status = Status.WAITING_FOR_PAYMENT;
     @CreationTimestamp
     @Column(nullable = false)
     private OffsetDateTime createdAt;

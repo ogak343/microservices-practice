@@ -2,8 +2,8 @@ package com.example.order.service.impl;
 
 import com.example.order.config.exception.CustomException;
 import com.example.order.contants.ErrorCode;
-import com.example.order.contants.Operation;
 import com.example.order.dto.resp.InfoResp;
+import com.example.order.entity.Order;
 import com.example.order.external.client.CustomerFeignClient;
 import com.example.order.external.client.ProductFeignClient;
 import com.example.order.contants.Status;
@@ -12,7 +12,7 @@ import com.example.order.dto.req.OrderUpdate;
 import com.example.order.dto.resp.OrderResp;
 import com.example.order.entity.ProductDetails;
 import com.example.order.external.messageBroker.KafkaProducer;
-import com.example.order.external.messageBroker.dto.OrderCreatePublishDto;
+import com.example.order.external.messageBroker.dto.SaveOrderDto;
 import com.example.order.mapper.OrderMapper;
 import com.example.order.repository.OrderRepository;
 import com.example.order.service.OrderService;
@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,9 +42,9 @@ public class OrderServiceImpl implements OrderService {
 
         var customer = customerClient.validateCustomer();
 
-        var orderedProducts = productClient.orderProducts(dto);
+        var orderedProducts = productClient.createOrder(dto);
 
-        kafkaProducer.publishOrderCreation(new OrderCreatePublishDto(customer.getId(), orderedProducts));
+        kafkaProducer.publishOrderCreation(new SaveOrderDto(customer.getId(), orderedProducts));
 
         return new InfoResp(200, Status.IN_CREATION_PROCESS.name());
     }
@@ -51,23 +52,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public InfoResp update(OrderUpdate dto) {
 
-        var order = repository.findById(dto.getOrderId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
-
-        var details = order.getProductDetails().stream()
-                .collect(Collectors.toMap(ProductDetails::getId, detail -> detail));
-
-        dto.getProductDetails().forEach(detail -> {
-            if (details.get(detail.getDetailId()) == null) {
-                throw new CustomException(ErrorCode.PRODUCT_DETAIL_NOT_FOUND);
-            }
-            if (detail.getOperation().equals(Operation.SUBTRACT)
-                    && details.get(detail.getDetailId()).getQuantity() < detail.getQuantity()) {
-                throw new CustomException(ErrorCode.INVALID_AMOUNT_SPECIFIED);
-            }
-        });
+        if (!repository.existsByIdAndStatus(dto.getOrderId(), Status.WAITING_FOR_PAYMENT))
+            throw new CustomException(ErrorCode.ORDER_NOT_FOUND);
 
         kafkaProducer.publishOrderModification(dto);
+
         return new InfoResp(200, String.format(Status.IN_UPDATE_PROCESS.name()));
     }
 
@@ -76,6 +65,7 @@ public class OrderServiceImpl implements OrderService {
         return mapper.toResp(repository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND)));
     }
+
 
     @Override
     public Page<OrderResp> getPage(Integer page, Integer size) {
@@ -86,14 +76,37 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    @Override
-    public void save(OrderCreatePublishDto dto) {
-
-        var order = mapper.toEntity(dto);
-        order.setStatus(Status.WAITING_FOR_PAYMENT);
+    public void save(SaveOrderDto dto) {
+        Order order;
+        if (dto.getOrderId() != null) {
+            order = repository.findById(dto.getOrderId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        } else {
+            order = mapper.toEntity(dto);
+        }
         order.setTotalPrice(calculatePrice(order.getProductDetails()));
         order.getProductDetails().forEach(x -> x.setOrder(order));
         repository.save(order);
+    }
+
+    public void modify(OrderUpdate dto) {
+
+        var order = repository.findByIdAndStatus(dto.getOrderId(), Status.WAITING_FOR_PAYMENT)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        var map = order.getProductDetails().stream()
+                .collect(Collectors.toMap(ProductDetails::getProductId, ProductDetails::getQuantity));
+
+        dto.getProductDetails().forEach(product -> {
+            if (map.get(product.getProductId()) != null) {
+                product.setQuantity(product.getQuantity() - map.get(product.getProductId()));
+            }
+        });
+
+        order.setStatus(Status.IN_UPDATE_PROCESS);
+        repository.save(order);
+
+        kafkaProducer.publishOrderModificationToProduct(dto);
     }
 
     private BigInteger calculatePrice(Set<ProductDetails> productDetails) {

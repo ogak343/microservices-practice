@@ -11,13 +11,14 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderCreatePublishDto {
+public class SaveOrderDto {
 
+    private Long orderId;
     private Long customerId;
-    private Set<ProductResp> orderedProducts;
+    private Set<ProductResp> products;
 
-    public OrderCreatePublishDto(Long customerId, OrderedProductResp orderedProducts) {
+    public SaveOrderDto(Long customerId, OrderedProductResp products) {
         this.customerId = customerId;
-        this.orderedProducts = orderedProducts.getProducts();
+        this.products = products.getProducts();
     }
 }

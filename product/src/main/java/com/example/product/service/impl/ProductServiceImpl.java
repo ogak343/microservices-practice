@@ -2,9 +2,8 @@ package com.example.product.service.impl;
 
 import com.example.product.config.exception.CustomException;
 import com.example.product.contants.ErrorCode;
-import com.example.product.dto.request.OrderCreate;
-import com.example.product.dto.request.ProductCreateReq;
-import com.example.product.dto.request.ProductUpdateReq;
+import com.example.product.dto.SaveOrderDto;
+import com.example.product.dto.request.*;
 import com.example.product.dto.resp.OrderedProductResp;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.entity.Product;
@@ -12,6 +11,7 @@ import com.example.product.mapper.ProductMapper;
 import com.example.product.repository.CategoryRepository;
 import com.example.product.repository.ProductRepository;
 import com.example.product.service.ProductService;
+import com.example.product.service.eventHandler.KafkaProducer;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service(value = "PRODUCT")
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository repository;
     private final CategoryRepository categoryRepository;
     private final ProductMapper mapper;
+    private final KafkaProducer kafkaProducer;
 
     @Override
     public ProductResp create(ProductCreateReq product) {
@@ -73,12 +75,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResp> getAllByIds(List<Long> ids) {
-        return repository.findAllById(ids).stream().map(mapper::toResp).toList();
-    }
-
-    @Override
-    public OrderedProductResp order(OrderCreate order) {
+    public OrderedProductResp createOrder(OrderCreate order) {
 
         var products = repository.findAllById(order.getProducts().keySet());
 
@@ -111,5 +108,30 @@ public class ProductServiceImpl implements ProductService {
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public void modify(OrderUpdate dto) {
+
+        var map = dto.getProductDetails().stream()
+                .collect(Collectors.toMap(ProductDetailsReq::getProductId, ProductDetailsReq::getQuantity));
+
+        var products = repository.findAllById(map.keySet());
+
+        if (products.size() != map.size()) {
+            throw new CustomException(ErrorCode.NOT_ALL_PRODUCTS_FOUND);
+        }
+
+        products.forEach(product -> {
+            if (product.getQuantity() < map.get(product.getId())) {
+                throw new CustomException(ErrorCode.INSUFFICIENT_QUANTITY);
+            } else {
+                product.setQuantity(product.getQuantity() - map.get(product.getId()));
+            }
+        });
+        products = repository.saveAll(products);
+
+        kafkaProducer.sendMessage(new SaveOrderDto(dto.getOrderId(), products.stream()
+                .map(product -> mapper.toOrderedProduct(product, map.get(product.getId()))).collect(Collectors.toSet())));
+
     }
 }
