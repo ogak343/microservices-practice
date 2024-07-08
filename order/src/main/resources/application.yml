@@ -36,9 +36,9 @@ feign:
       url: http://127.0.0.1:8081
 kafka:
   topic:
-    save_order: orderCreationTopic
-    modify_order: orderModificationTopic
-    modify_product: productModificationTopic
+    save_order: topic_save_order
+    modify_order: topic_modify_order
+    modify_product: topic_modify_product
 
 jwt:
   secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711

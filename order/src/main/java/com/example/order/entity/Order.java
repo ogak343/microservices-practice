@@ -21,7 +21,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<ProductDetails> productDetails = new HashSet<>();
     @Column(nullable = false)
     private BigInteger totalPrice;
@@ -29,7 +29,7 @@ public class Order {
     private Long customerId;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status = Status.WAITING_FOR_PAYMENT;
+    private Status status;
     @CreationTimestamp
     @Column(nullable = false)
     private OffsetDateTime createdAt;

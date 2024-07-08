@@ -23,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -81,9 +80,16 @@ public class OrderServiceImpl implements OrderService {
         if (dto.getOrderId() != null) {
             order = repository.findById(dto.getOrderId())
                     .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+            var map = order.getProductDetails().stream().collect(Collectors.toMap(ProductDetails::getProductId, productDetails -> productDetails));
+            dto.getProducts().forEach(product-> {
+                var entity = map.get(product.getId());
+                entity.setQuantity(entity.getQuantity() + product.getQuantity());
+            });
+
         } else {
             order = mapper.toEntity(dto);
         }
+        order.setStatus(Status.WAITING_FOR_PAYMENT);
         order.setTotalPrice(calculatePrice(order.getProductDetails()));
         order.getProductDetails().forEach(x -> x.setOrder(order));
         repository.save(order);

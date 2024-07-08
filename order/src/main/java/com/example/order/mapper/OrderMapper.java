@@ -12,7 +12,6 @@ import java.util.Set;
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface OrderMapper {
-    @Mapping(target = "productDetails.quantity", ignore = true)
     @Mapping(target = "productDetails", qualifiedByName = "toResp")
     OrderResp toResp(Order order);
 
@@ -24,7 +23,7 @@ public interface OrderMapper {
     @Mapping(target = "id", source = "productId")
     ProductResp toRespSet(ProductDetails product);
 
-    @Mapping(target = "productDetails", qualifiedByName = "toEntity", source = "orderedProducts")
+    @Mapping(target = "productDetails", qualifiedByName = "toEntity", source = "products")
     Order toEntity(SaveOrderDto dto);
 
     @Named(value = "toEntity")

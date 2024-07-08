@@ -1,6 +1,5 @@
-package com.example.order.config;
+package com.example.product.config;
 
-import com.example.order.config.helpers.CustomDtoDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -44,7 +43,7 @@ public class KafkaConfiguration {
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "order-service");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "product-service");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CustomDtoDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");

@@ -21,10 +21,10 @@ public class CustomValidatorImplementation
         Set<Long> set = new HashSet<>();
         AtomicBoolean result = new AtomicBoolean(true);
         dto.forEach(x -> {
-            if (set.contains(x.getDetailId())) {
+            if (set.contains(x.getProductId())) {
                 result.set(false);
             } else {
-                set.add(x.getDetailId());
+                set.add(x.getProductId());
             }
         });
 

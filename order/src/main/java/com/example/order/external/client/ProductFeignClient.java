@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
         configuration = {FeignClientInterceptor.class, FeignClientDecoder.class})
 public interface ProductFeignClient {
 
-    @PostMapping("/order")
+    @PostMapping("/order/create")
     OrderedProductResp createOrder(@RequestBody OrderCreate orderCreate);
 
 }

@@ -130,8 +130,7 @@ public class ProductServiceImpl implements ProductService {
         });
         products = repository.saveAll(products);
 
-        kafkaProducer.sendMessage(new SaveOrderDto(dto.getOrderId(), products.stream()
-                .map(product -> mapper.toOrderedProduct(product, map.get(product.getId()))).collect(Collectors.toSet())));
+        kafkaProducer.sendMessage(new SaveOrderDto(dto.getOrderId(), products.stream().map(mapper::toResp).collect(Collectors.toSet())));
 
     }
 }
