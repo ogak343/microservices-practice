@@ -3,7 +3,11 @@ package com.example.product.service.impl;
 import com.example.product.config.exception.CustomException;
 import com.example.product.contants.ErrorCode;
 import com.example.product.dto.SaveOrderDto;
-import com.example.product.dto.request.*;
+import com.example.product.dto.request.ProductCreateReq;
+import com.example.product.dto.request.ProductUpdateReq;
+import com.example.product.dto.request.OrderCreate;
+import com.example.product.dto.request.OrderUpdate;
+import com.example.product.dto.request.ProductDetailsReq;
 import com.example.product.dto.resp.OrderedProductResp;
 import com.example.product.dto.resp.ProductResp;
 import com.example.product.entity.Product;
@@ -130,7 +134,8 @@ public class ProductServiceImpl implements ProductService {
         });
         products = repository.saveAll(products);
 
-        kafkaProducer.sendMessage(new SaveOrderDto(dto.getOrderId(), products.stream().map(mapper::toResp).collect(Collectors.toSet())));
+        kafkaProducer.sendMessage(new SaveOrderDto(dto.getOrderId(),
+                products.stream().map(product -> mapper.toOrderedProduct(product, map.get(product.getId()))).collect(Collectors.toSet())));
 
     }
 }

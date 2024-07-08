@@ -109,7 +109,6 @@ public class OrderServiceImpl implements OrderService {
             }
         });
 
-        order.setStatus(Status.IN_UPDATE_PROCESS);
         repository.save(order);
 
         kafkaProducer.publishOrderModificationToProduct(dto);
