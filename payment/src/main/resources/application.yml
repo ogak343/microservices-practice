@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: payment-service
+  config:
+    import: optional:configserver:127.0.0.1:8888
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/payment_db
+    username: payment
+    password: payment
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: db/changelog/Initializer.xml
+    default-schema: public
+    liquibase-schema: public
+server:
+  port: 8080
+
+#kafka:
+#  topic:
+#    modify_product: topic_modify_product
+
+jwt:
+  secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711
