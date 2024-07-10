@@ -1,7 +1,7 @@
 package com.example.payment.entity;
 
 import com.example.payment.constants.PaymentStatus;
-import com.example.payment.external.feign.OrderResp;
+import com.example.payment.external.feign.dto.OrderResp;
 import jakarta.persistence.*;
 
 import lombok.Getter;

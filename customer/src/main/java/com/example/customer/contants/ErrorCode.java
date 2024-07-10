@@ -10,7 +10,8 @@ public enum ErrorCode {
     OTP_EXPIRED(401),
     WRONG_PASSWORD(403),
     WRONG_CREDENTIALS(403),
-    CUSTOMER_NOT_FOUND(404);
+    CUSTOMER_NOT_FOUND(404),
+    USER_NOT_FOUND_IN_CACHE(404);
 
     private int code;
 

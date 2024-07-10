@@ -1,4 +1,4 @@
-package com.example.payment.service;
+package com.example.payment.service.impl;
 
 import com.example.payment.constants.ErrorCode;
 import com.example.payment.constants.PaymentStatus;
@@ -8,27 +8,30 @@ import com.example.payment.dto.PaymentPerformDto;
 import com.example.payment.entity.Payment;
 import com.example.payment.entity.PaymentOtp;
 import com.example.payment.exception.CustomException;
-import com.example.payment.external.feign.CustomerClient;
 import com.example.payment.external.feign.OrderClient;
-import com.example.payment.external.feign.Status;
-import com.example.payment.external.feign.dto.CustomerResp;
+import com.example.payment.external.feign.dto.Status;
 import com.example.payment.repo.OtpRepository;
 import com.example.payment.repo.PaymentRepository;
+import com.example.payment.service.PaymentService;
 import com.example.payment.service.helper.KafkaPublisher;
+import com.example.payment.service.helper.RedisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 
 @Service("PAYMENT")
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentServiceImpl implements PaymentService {
 
-    private final PaymentRepository repository;
+    private final PaymentRepository paymentRepository;
     private final OrderClient orderClient;
     private final KafkaPublisher kafkaPublisher;
     private final OtpRepository otpRepository;
-    private final CustomerClient customerClient;
+    private final RedisService redisService;
 
     @Override
     public Long create(Long orderId) {
@@ -40,13 +43,13 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         var payment = new Payment(order);
-        payment = repository.save(payment);
+        payment = paymentRepository.save(payment);
 
         var otp = otpRepository.save(new PaymentOtp(payment));
 
-        var customer = customerClient.profile(); //TODO need implementation for caching of customer e-address
+        var email = getEmail();
 
-        kafkaPublisher.publishPaymentOtp(makeOtpDto(payment, customer));
+        kafkaPublisher.publishPaymentOtp(makeOtpDto(payment, email));
         return otp.getId();
     }
 
@@ -69,33 +72,36 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPerformedAt(OffsetDateTime.now());
 
         orderClient.verifyOrder(payment.getOrderId());
-
-        CustomerResp customer = customerClient.profile();
-
-        repository.save(payment);
-
+        paymentRepository.save(payment);
         otpRepository.save(otp);
 
-        kafkaPublisher.publishPaymentOtp(makeInfoDto(payment, customer));
+        var email = getEmail();
+        kafkaPublisher.publishPaymentOtp(makeInfoDto(payment, email));
 
-        return "Payment is being performed";
+        return "Payment was successful";
     }
 
-    private NotificationDto makeOtpDto(Payment payment, CustomerResp customer) {
+    private String getEmail() {
+        Long customerId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return redisService.getMessage(customerId);
+    }
+
+    private NotificationDto makeOtpDto(Payment payment, String email) {
         return NotificationDto
                 .builder()
                 .type(Type.MAIL_WITH_ATTACHMENT)
-                .receiver(customer.getEmail())
+                .receiver(email)
                 .message(String.format("Your verification code: %s", payment.getAmount()))
                 .build();
     }
 
-    private NotificationDto makeInfoDto(Payment payment, CustomerResp customer) {
+    private NotificationDto makeInfoDto(Payment payment, String email) {
 
         return NotificationDto
                 .builder()
                 .type(Type.MAIL_WITH_ATTACHMENT)
-                .receiver(customer.getEmail())
+                .receiver(email)
                 .message(String.format("Payment with amount %s has been performed", payment.getAmount()))
                 .build();
     }

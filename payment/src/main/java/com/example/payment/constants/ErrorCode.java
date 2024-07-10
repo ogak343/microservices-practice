@@ -5,7 +5,10 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
     INVALID_STATUS(400),
-    INVALID_OTP(400);
+    INVALID_OTP(400),
+    INVALID_TOKEN(401),
+    CUSTOMER_NOT_FOUN_IN_CACHE(404),
+    SERVER_SIDE_ERROR(500);
 
     private final int code;
 

@@ -5,7 +5,41 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="2024-07-09-1" author="Ogabek">
+        <createTable tableName="payment" schemaName="public">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="order_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_status" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="performed_at" type="timestamp"/>
+            <column name="cancelled_at" type="timestamp"/>
+        </createTable>
 
+        <createTable tableName="otp_entity" schemaName="public">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="payment_id" type="uuid">
+                <constraints foreignKeyName="otp_payment_id" references="payment(id)" nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expired_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="confirmed_at" type="timestamp"/>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

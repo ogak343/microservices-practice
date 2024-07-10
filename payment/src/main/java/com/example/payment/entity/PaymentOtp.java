@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,8 +21,7 @@ public class PaymentOtp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "payment_id", nullable = false)
+    @ManyToOne
     private Payment payment;
     @Column(nullable = false)
     private OffsetDateTime createdAt;

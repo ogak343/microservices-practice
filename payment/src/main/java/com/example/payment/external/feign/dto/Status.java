@@ -1,4 +1,4 @@
-package com.example.payment.external.feign;
+package com.example.payment.external.feign.dto;
 
 public enum Status {
     IN_CREATION_PROCESS,

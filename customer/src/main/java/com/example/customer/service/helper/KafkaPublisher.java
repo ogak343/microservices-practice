@@ -1,4 +1,4 @@
-package com.example.customer.service.impl;
+package com.example.customer.service.helper;
 
 import com.example.customer.contants.Type;
 import com.example.customer.dto.NotificationDto;

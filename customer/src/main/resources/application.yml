@@ -16,6 +16,12 @@ spring:
     default-schema: public
     liquibase-schema: public
     change-log: classpath:db/changelog/Initializer.xml
+  data:
+    redis:
+      timeout: 30 #in minutes
+      host: 127.0.0.1
+      password: redis_password
+      port: 6379
   cloud:
     openfeign:
       autoconfiguration:

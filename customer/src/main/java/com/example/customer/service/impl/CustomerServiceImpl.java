@@ -15,6 +15,8 @@ import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;
 import com.example.customer.service.CustomerService;
 import com.example.customer.service.JwtService;
+import com.example.customer.service.helper.KafkaPublisher;
+import com.example.customer.service.helper.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,6 +35,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final KafkaPublisher kafkaPublisher;
     private final BCryptPasswordEncoder encoder;
     private final JwtService jwtService;
+    private final RedisService redisService;
 
     @Override
     public Long create(CustomerCreateReq create) {
@@ -68,6 +71,8 @@ public class CustomerServiceImpl implements CustomerService {
         repository.save(customer);
         otpRepository.deleteOTPByCustomerId(customer.getId());
 
+        redisService.save(customer.getId(), customer.getEmail());
+
         return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
     }
 
@@ -79,6 +84,8 @@ public class CustomerServiceImpl implements CustomerService {
 
         if (!encoder.matches(login.getPassword(), customer.getPassword()))
             throw new CustomException(ErrorCode.WRONG_PASSWORD);
+
+        redisService.save(customer.getId(), customer.getEmail());
 
         return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
     }
@@ -99,14 +106,17 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         mapper.update(entity, updateDto);
+        entity = repository.save(entity);
 
-        return mapper.toResp(repository.save(entity));
+        redisService.save(entity.getId(), entity.getEmail());
+        return mapper.toResp(entity);
     }
 
     @Override
     public void delete() {
 
         repository.deleteById(getCustomerId());
+        redisService.remove(getCustomerId());
     }
 
     private Long getCustomerId() {

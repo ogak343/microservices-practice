@@ -1,4 +1,4 @@
-package com.example.payment.external.feign;
+package com.example.payment.external.feign.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

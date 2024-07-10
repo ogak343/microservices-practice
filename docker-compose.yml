@@ -32,15 +32,25 @@ services:
       POSTGRES_PASSWORD: order
     volumes:
       - VOLUME_ORDER_DB:/var/lib/postgresql/data
+  payment_db:
+    image: postgres:16
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: payment
+      POSTGRES_PASSWORD: payment
+    volumes:
+      - VOLUME_PAYMENT_DB:/var/lib/postgresql/data
 
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper
     ports:
       - "2181:2181"
     networks:
       - microservices-network
   kafka:
-    image: wurstmeister/kafka
+    image: apache/kafka
     ports:
       - "9092:9092"
     environment:
@@ -48,7 +58,15 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     networks:
       - microservices-network
-
+  redis:
+    image: redis
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: redis_password
+    volumes:
+      - redis_data:/data
 #  zipkin:
 #    container_name: zipkin
 #    image: openzipkin/zipkin
@@ -60,7 +78,11 @@ services:
 networks:
   microservices-network:
     driver: bridge
+
 volumes:
   VOLUME_PRODUCT_DB:
   VOLUME_CUSTOMER_DB:
   VOLUME_ORDER_DB:
+  VOLUME_PAYMENT_DB:
+  redis_data:
+    driver: local

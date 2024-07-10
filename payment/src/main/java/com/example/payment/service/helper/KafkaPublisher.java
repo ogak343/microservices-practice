@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KafkaPublisher {
 
-    @Value("${kafka.topic.payment_otp}")
+    @Value("${kafka.topic.otp}")
     private String TOPIC;
 
     private final KafkaTemplate<String, Object> kafkaTemplate;

@@ -4,7 +4,7 @@ spring:
   config:
     import: optional:configserver:127.0.0.1:8888
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/payment_db
+    url: jdbc:postgresql://127.0.0.1:5435/payment_db
     username: payment
     password: payment
     driver-class-name: org.postgresql.Driver
@@ -16,12 +16,22 @@ spring:
     change-log: db/changelog/Initializer.xml
     default-schema: public
     liquibase-schema: public
+  data:
+    redis:
+      host: 127.0.0.1
+      password: redis_password
+      port: 6379
 server:
-  port: 8080
+  port: 8084
 
-#kafka:
-#  topic:
-#    modify_product: topic_modify_product
+kafka:
+  topic:
+    otp: topic_otp
+feign:
+  client:
+    order:
+      name: order-client
+      url: http://127.0.0.1:8082
 
 jwt:
   secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711

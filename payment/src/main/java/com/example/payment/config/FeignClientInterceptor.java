@@ -1,7 +1,7 @@
 package com.example.payment.config;
 
 import com.example.payment.constants.ClientType;
-import com.example.payment.service.JwtService;
+import com.example.payment.service.helper.JwtService;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
