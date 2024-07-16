@@ -4,5 +4,5 @@ public enum PaymentStatus {
 
     CREATED,
     PERFORMED,
-    CANCELLED;
+    CANCELLED
 }

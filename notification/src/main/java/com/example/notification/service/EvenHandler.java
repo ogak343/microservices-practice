@@ -6,9 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor

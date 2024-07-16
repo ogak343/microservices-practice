@@ -56,7 +56,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public String perform(PaymentPerformDto dto) {
 
-        var optionalOtp = otpRepository.findByIdAndExpiredAtBefore(dto.getOtpId(), OffsetDateTime.now());
+        var optionalOtp = otpRepository.findByIdAndExpiredAtBefore(dto.otpId(), OffsetDateTime.now());
 
         if (optionalOtp.isEmpty())
             throw new CustomException(ErrorCode.INVALID_OTP);
