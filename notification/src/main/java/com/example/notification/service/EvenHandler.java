@@ -21,6 +21,7 @@ public class EvenHandler {
     public void listen(NotificationDto dto) {
 
         validateDto(dto);
+        log.info("Request dto : {}", dto);
 
         notificationService.get(dto.getType().name()).sendOTP(dto);
     }

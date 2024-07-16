@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+        .content p {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .otp-code {
+            font-size: 24px;
+            color: #007bff;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Account Created</h1>
+    </div>
+    <div class="content">
+        <p>You have created an account on Online-Store.com.</p>
+        <p>Here is your OTP code to confirm your identity:</p>
+        <div class="otp-code" th:text="${otpCode}">123456</div>
+    </div>
+    <div class="footer">
+        <p>If you did not sign up for this account, please ignore this message.</p>
+    </div>
+</div>
+</body>
+</html>

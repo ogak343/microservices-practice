@@ -10,9 +10,9 @@ import java.util.Optional;
 @Service
 public class RedisService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public RedisService(RedisTemplate<String, Object> redisTemplate) {
+    public RedisService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -23,6 +23,6 @@ public class RedisService {
         if (optionalValue.isEmpty()) {
             throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUN_IN_CACHE);
         }
-        return (String) optionalValue.get();
+        return optionalValue.get();
     }
 }

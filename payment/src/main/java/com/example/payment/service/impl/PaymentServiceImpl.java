@@ -90,7 +90,7 @@ public class PaymentServiceImpl implements PaymentService {
     private NotificationDto makeOtpDto(Payment payment, String email) {
         return NotificationDto
                 .builder()
-                .type(Type.MAIL_WITH_ATTACHMENT)
+                .type(Type.MAIL)
                 .receiver(email)
                 .message(String.format("Your verification code: %s", payment.getAmount()))
                 .build();
@@ -100,7 +100,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         return NotificationDto
                 .builder()
-                .type(Type.MAIL_WITH_ATTACHMENT)
+                .type(Type.MAIL)
                 .receiver(email)
                 .message(String.format("Payment with amount %s has been performed", payment.getAmount()))
                 .build();

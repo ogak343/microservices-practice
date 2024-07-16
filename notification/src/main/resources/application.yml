@@ -15,6 +15,7 @@ server:
 kafka:
   topic:
     otp: topic_otp
-mail:
-  subject:
-    otp: "Account confirmation"
+template:
+  accountVerification:
+  paymentCreation:
+  paymentPerform:
