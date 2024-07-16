@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service(value = "SMS")
 public class SmsServiceImpl implements NotificationService {
+
     @Override
     public void sendOTP(NotificationDto dto) {
 

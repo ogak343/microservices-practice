@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +15,16 @@ import java.util.Map;
 public class NotificationDto {
     private Type type;
     private Template template;
-    private boolean withAttachment;
     private String title;
     private String receiver;
-    private Map<String, Object> message;
+    private Map<String, Object> value;
+    private String message;
+
+    public boolean isValid() {
+        return switch (this.type) {
+            case MAIL -> Objects.isNull(value) || Objects.isNull(template) || Objects.isNull(title)
+                    || Objects.isNull(receiver);
+            case SMS -> Objects.isNull(message) || Objects.isNull(title) || Objects.isNull(receiver);
+        };
+    }
 }

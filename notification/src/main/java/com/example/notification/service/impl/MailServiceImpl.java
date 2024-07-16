@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 @Service(value = "MAIL")
@@ -33,15 +32,13 @@ public class MailServiceImpl implements NotificationService {
     public void sendOTP(NotificationDto dto) {
 
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message,
-                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                StandardCharsets.UTF_8.name());
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         Context context = new Context();
 
-        validationFields(dto.getTemplate(), dto.getMessage().keySet());
+        validationFields(dto.getTemplate(), dto.getValue().keySet());
         String htmlContent;
-        dto.getMessage().forEach(context::setVariable);
+        dto.getValue().forEach(context::setVariable);
 
         switch (dto.getTemplate()) {
             case PAYMENT_CREATE -> htmlContent = templateEngine.process("PaymentCreation.html", context);
