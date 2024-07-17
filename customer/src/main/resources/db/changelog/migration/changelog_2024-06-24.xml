@@ -42,4 +42,10 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="2024-07-17" author="Ogabek">
+        <createIndex tableName="customer" indexName="customer_email_index">
+            <column name="email"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
