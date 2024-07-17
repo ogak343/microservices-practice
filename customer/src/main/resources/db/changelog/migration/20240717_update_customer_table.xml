@@ -1,0 +1,14 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="2024-07-17 12:03" author="Rahmatullo">
+        <addColumn tableName="customer">
+            <column name="deleted_at" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
+
+</databaseChangeLog>

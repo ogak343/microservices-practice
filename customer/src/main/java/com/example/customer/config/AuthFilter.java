@@ -57,7 +57,7 @@ public class AuthFilter extends OncePerRequestFilter {
 
         final var customerId = jwtService.extractId(token);
 
-        if (!repository.existsByIdAndActiveTrue(customerId))
+        if (!repository.existsByIdAndActiveTrueAndDeletedAtIsNull(customerId))
             throw new CustomException(ErrorCode.WRONG_CREDENTIALS);
 
         final var role = jwtService.extractSubject(token);

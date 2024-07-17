@@ -8,6 +8,7 @@ import com.example.customer.dto.req.CustomerUpdateReq;
 import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
 import com.example.customer.dto.resp.LoginResp;
+import com.example.customer.entity.Customer;
 import com.example.customer.entity.OTP;
 import com.example.customer.config.exception.CustomException;
 import com.example.customer.mapper.CustomerMapper;
@@ -22,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
@@ -79,7 +81,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public LoginResp login(LoginReq login) {
 
-        var customer = repository.findByEmailAndActiveTrue(login.getEmail())
+        var customer = repository.findByEmailAndActiveTrueAndDeletedAtIsNull(login.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
 
         if (!encoder.matches(login.getPassword(), customer.getPassword()))
@@ -93,8 +95,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerResp profile() {
         var customer = getCustomerId();
-        return mapper.toResp(repository.findById(customer)
-                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND)));
+        return mapper.toResp(getById(customer));
     }
 
     @Override
@@ -102,8 +103,8 @@ public class CustomerServiceImpl implements CustomerService {
 
         validateAccess(updateDto.getId());
 
-        var entity = repository.findById(updateDto.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+        // Nimaga customer id dto dan olgansiz, Security contextdan olsa bomidi?
+        var entity = getById(getCustomerId());
 
         mapper.update(entity, updateDto);
         entity = repository.save(entity);
@@ -115,7 +116,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void delete() {
 
-        repository.deleteById(getCustomerId());
+        var customer = getById(getCustomerId());
+        customer.setActive(false);
+        customer.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+        repository.save(customer);
         redisService.remove(getCustomerId());
     }
 
@@ -133,5 +137,10 @@ public class CustomerServiceImpl implements CustomerService {
 
         if (!Objects.equals(customerId, id))
             throw new CustomException(ErrorCode.WRONG_CREDENTIALS);
+    }
+
+    private Customer getById(Long id) {
+        return repository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
     }
 }
