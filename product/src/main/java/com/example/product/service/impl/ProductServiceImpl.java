@@ -81,22 +81,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public OrderedProductResp createOrder(OrderCreate order) {
 
-        var products = repository.findAllById(order.getProducts().keySet());
+        var products = repository.findAllById(order.products().keySet());
 
-        if (!Objects.equals(products.size(), order.getProducts().size()))
+        if (!Objects.equals(products.size(), order.products().size()))
             throw new CustomException(ErrorCode.NOT_ALL_PRODUCTS_FOUND);
 
         products = products.stream()
                 .peek(product -> {
-                    if (product.getQuantity() < order.getProducts().get(product.getId())) {
+                    if (product.getQuantity() < order.products().get(product.getId())) {
                         throw new CustomException(ErrorCode.INSUFFICIENT_QUANTITY);
                     }
-                    product.setQuantity(product.getQuantity() - order.getProducts().get(product.getId()));
+                    product.setQuantity(product.getQuantity() - order.products().get(product.getId()));
                 }).toList();
 
         repository.saveAll(products);
         return new OrderedProductResp(products.stream().map(product ->
-                mapper.toOrderedProduct(product, order.getProducts().get(product.getId()))).toList());
+                mapper.toOrderedProduct(product, order.products().get(product.getId()))).toList());
     }
 
     private Specification<Product> makeSpecification(Long categoryId, String nameLike) {
@@ -116,8 +116,8 @@ public class ProductServiceImpl implements ProductService {
 
     public void modify(OrderUpdate dto) {
 
-        var map = dto.getProductDetails().stream()
-                .collect(Collectors.toMap(ProductDetailsReq::getProductId, ProductDetailsReq::getQuantity));
+        var map = dto.productDetails().stream()
+                .collect(Collectors.toMap(ProductDetailsReq::productId, ProductDetailsReq::quantity));
 
         var products = repository.findAllById(map.keySet());
 
@@ -134,7 +134,7 @@ public class ProductServiceImpl implements ProductService {
         });
         products = repository.saveAll(products);
 
-        kafkaProducer.sendMessage(new SaveOrderDto(dto.getOrderId(),
+        kafkaProducer.sendMessage(new SaveOrderDto(dto.orderId(),
                 products.stream().map(product -> mapper.toOrderedProduct(product, map.get(product.getId()))).collect(Collectors.toSet())));
 
     }

@@ -21,7 +21,7 @@ public class RedisService {
         var optionalValue = Optional.ofNullable(redisTemplate.opsForValue().get(String.valueOf(id)));
 
         if (optionalValue.isEmpty()) {
-            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUN_IN_CACHE);
+            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND_IN_CACHE);
         }
         return optionalValue.get();
     }

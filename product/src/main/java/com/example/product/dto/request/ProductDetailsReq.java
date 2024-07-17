@@ -1,9 +1,8 @@
 package com.example.product.dto.request;
 
-import lombok.Data;
+public record ProductDetailsReq(
+        Long productId,
+        Integer quantity
+) {
 
-@Data
-public class ProductDetailsReq {
-    private Long productId;
-    private Integer quantity;
 }
