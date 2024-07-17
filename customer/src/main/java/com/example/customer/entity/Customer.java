@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name = "customer")
 @Setter
@@ -19,5 +21,5 @@ public class Customer {
     private String password;
     private String address;
     private boolean active;
-
+    private Timestamp deletedAt;
 }
