@@ -1,4 +1,4 @@
-package com.example.order.dto.resp;
+package com.example.payment.external.feign.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

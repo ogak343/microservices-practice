@@ -1,6 +1,6 @@
 package com.example.customer.service.helper;
 
-import com.example.customer.contants.Type;
+import com.example.customer.contants.Template;
 import com.example.customer.dto.NotificationDto;
 import com.example.customer.entity.OTP;
 import lombok.extern.slf4j.Slf4j;
@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 @Slf4j
 public class KafkaPublisher {
 
-    @Value("${kafka.topic.otp}")
+    @Value("${kafka.topic.email}")
     private String TOPIC_OTP;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -27,9 +29,10 @@ public class KafkaPublisher {
 
     private NotificationDto buildDto(OTP otp) {
         NotificationDto notificationDto = new NotificationDto();
-        notificationDto.setType(Type.MAIL);
         notificationDto.setReceiver(otp.getCustomer().getEmail());
-        notificationDto.setMessage(String.format("Your OTP code : %s", otp.getCode()));
+        notificationDto.setValue(Map.of("otpCode", otp.getCode()));
+        notificationDto.setTitle("AccountVerification");
+        notificationDto.setTemplate(Template.ACCOUNT_VERIFICATION);
         return notificationDto;
     }
 }

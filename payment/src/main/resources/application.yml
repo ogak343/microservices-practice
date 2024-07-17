@@ -26,7 +26,8 @@ server:
 
 kafka:
   topic:
-    otp: topic_otp
+    email: topicEmail
+    sms: topicSMS
 feign:
   client:
     order:

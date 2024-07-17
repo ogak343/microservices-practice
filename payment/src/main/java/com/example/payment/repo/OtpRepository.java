@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface OtpRepository extends JpaRepository<PaymentOtp, Long> {
 
-    Optional<PaymentOtp> findByIdAndExpiredAtBefore(Long id, OffsetDateTime expiredAt);
+    Optional<PaymentOtp> findByIdAndExpiredAtAfter(Long id, OffsetDateTime expiredAt);
 }

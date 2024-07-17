@@ -13,7 +13,7 @@ public enum ErrorCode {
     CUSTOMER_NOT_FOUND(404),
     USER_NOT_FOUND_IN_CACHE(404);
 
-    private int code;
+    private final int code;
 
     ErrorCode(int code) {
         this.code = code;

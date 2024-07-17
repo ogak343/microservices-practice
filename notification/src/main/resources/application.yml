@@ -14,8 +14,15 @@ server:
 
 kafka:
   topic:
-    otp: topic_otp
+    email: topicEmail
+    sms: topicSMS
 template:
   accountVerification:
+    - "otpCode"
   paymentCreation:
+    - "description"
+    - "price"
+    - "otpCode"
   paymentPerform:
+    - "message"
+    - "price"

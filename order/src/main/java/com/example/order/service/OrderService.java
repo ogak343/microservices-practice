@@ -17,4 +17,6 @@ public interface OrderService {
     OrderResp get(Long id);
 
     Page<OrderResp> getPage(Integer page, Integer size);
+
+    void verify(Long orderId);
 }

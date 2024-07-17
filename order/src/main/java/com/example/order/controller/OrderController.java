@@ -39,6 +39,14 @@ public class OrderController {
         return ResponseEntity.ok(service.update(dto));
     }
 
+    @PostMapping("/verify")
+    public ResponseEntity<Void> verify(@RequestParam("orderId") Long orderId) {
+        log.info("Verify order: {}", orderId);
+
+        service.verify(orderId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<OrderResp> get(@PathVariable Long id) {
 

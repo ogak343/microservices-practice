@@ -2,13 +2,14 @@ package com.example.payment.service.impl;
 
 import com.example.payment.constants.ErrorCode;
 import com.example.payment.constants.PaymentStatus;
-import com.example.payment.constants.Type;
-import com.example.payment.dto.NotificationDto;
+import com.example.payment.constants.Template;
+import com.example.payment.dto.EmailReqDto;
 import com.example.payment.dto.PaymentPerformDto;
 import com.example.payment.entity.Payment;
 import com.example.payment.entity.PaymentOtp;
 import com.example.payment.exception.CustomException;
 import com.example.payment.external.feign.OrderClient;
+import com.example.payment.external.feign.dto.OrderResp;
 import com.example.payment.external.feign.dto.Status;
 import com.example.payment.repo.OtpRepository;
 import com.example.payment.repo.PaymentRepository;
@@ -21,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.Map;
 
 @Service("PAYMENT")
 @RequiredArgsConstructor
@@ -38,9 +40,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         var order = orderClient.getOrder(orderId);
 
-        if (order.getStatus() != Status.WAITING_FOR_PAYMENT) {
+        if (order.getStatus() != Status.WAITING_FOR_PAYMENT)
             throw new CustomException(ErrorCode.INVALID_STATUS);
-        }
 
         var payment = new Payment(order);
         payment = paymentRepository.save(payment);
@@ -49,14 +50,14 @@ public class PaymentServiceImpl implements PaymentService {
 
         var email = getEmail();
 
-        kafkaPublisher.publishPaymentOtp(makeOtpDto(payment, email));
+        kafkaPublisher.publishPaymentOtp(makeOtpDto(otp.getCode(), order, email));
         return otp.getId();
     }
 
     @Override
     public String perform(PaymentPerformDto dto) {
 
-        var optionalOtp = otpRepository.findByIdAndExpiredAtBefore(dto.getOtpId(), OffsetDateTime.now());
+        var optionalOtp = otpRepository.findByIdAndExpiredAtAfter(dto.getOtpId(), OffsetDateTime.now());
 
         if (optionalOtp.isEmpty())
             throw new CustomException(ErrorCode.INVALID_OTP);
@@ -68,10 +69,11 @@ public class PaymentServiceImpl implements PaymentService {
         otp.setConfirmedAt(OffsetDateTime.now());
         var payment = otp.getPayment();
 
+        orderClient.verifyOrder(payment.getOrderId());
+
         payment.setPaymentStatus(PaymentStatus.PERFORMED);
         payment.setPerformedAt(OffsetDateTime.now());
 
-        orderClient.verifyOrder(payment.getOrderId());
         paymentRepository.save(payment);
         otpRepository.save(otp);
 
@@ -87,22 +89,31 @@ public class PaymentServiceImpl implements PaymentService {
         return redisService.getMessage(customerId);
     }
 
-    private NotificationDto makeOtpDto(Payment payment, String email) {
-        return NotificationDto
+    private EmailReqDto makeOtpDto(Integer otpCode, OrderResp order, String email) {
+
+        StringBuilder description = new StringBuilder();
+
+        order.getProductDetails().forEach(detail ->
+                description.append(String.format(", %s %s", detail.quantity(), detail.name()))
+        );
+
+        return EmailReqDto
                 .builder()
-                .type(Type.MAIL)
                 .receiver(email)
-                .message(String.format("Your verification code: %s", payment.getAmount()))
+                .title("Payment Details")
+                .template(Template.PAYMENT_CREATE)
+                .value(Map.of("otpCode", otpCode, "price", "$" + order.getTotalPrice(), "description", description.substring(2)))
                 .build();
     }
 
-    private NotificationDto makeInfoDto(Payment payment, String email) {
+    private EmailReqDto makeInfoDto(Payment payment, String email) {
 
-        return NotificationDto
+        return EmailReqDto
                 .builder()
-                .type(Type.MAIL)
                 .receiver(email)
-                .message(String.format("Payment with amount %s has been performed", payment.getAmount()))
+                .title("Payment Details")
+                .template(Template.PAYMENT_PERFORM)
+                .value(Map.of("message", "Payment performed successfully", "price", "$" + payment.getAmount()))
                 .build();
     }
 }

@@ -42,4 +42,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="2024-07-17-2" author="Ogabek">
+        <addColumn tableName="otp_entity">
+            <column name="code" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

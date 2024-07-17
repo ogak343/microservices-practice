@@ -75,6 +75,16 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    @Override
+    public void verify(Long orderId) {
+
+        var order = repository.findById(orderId)
+                .orElseThrow(()-> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        order.setStatus(Status.PAID);
+        repository.save(order);
+    }
+
     public void save(SaveOrderDto dto) {
         Order order;
         if (dto.getOrderId() != null) {
@@ -82,8 +92,8 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
             var map = order.getProductDetails().stream().collect(Collectors.toMap(ProductDetails::getProductId, productDetails -> productDetails));
             dto.getProducts().forEach(product-> {
-                var entity = map.get(product.getId());
-                entity.setQuantity(entity.getQuantity() + product.getQuantity());
+                var entity = map.get(product.id());
+                entity.setQuantity(entity.getQuantity() + product.quantity());
             });
 
         } else {

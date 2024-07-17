@@ -9,7 +9,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
+import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -21,6 +23,7 @@ public class PaymentOtp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Integer code;
     @ManyToOne
     private Payment payment;
     @Column(nullable = false)
@@ -29,8 +32,10 @@ public class PaymentOtp {
     private OffsetDateTime expiredAt;
     private OffsetDateTime confirmedAt;
 
+    @SneakyThrows
     public PaymentOtp(Payment payment) {
         this.payment = payment;
+        this.code = SecureRandom.getInstance("SHA1PRNG").nextInt(100000, 999999);
         this.createdAt = OffsetDateTime.now();
         this.expiredAt = OffsetDateTime.now().plusMinutes(5);
     }

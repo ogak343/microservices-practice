@@ -2,6 +2,7 @@ package com.example.notification.service.impl;
 
 import com.example.notification.config.TemplateConfiguration;
 import com.example.notification.contants.Template;
+import com.example.notification.dto.EmailReqDto;
 import com.example.notification.dto.NotificationDto;
 import com.example.notification.service.NotificationService;
 import jakarta.mail.internet.MimeMessage;
@@ -21,7 +22,9 @@ public class MailServiceImpl implements NotificationService {
     private final TemplateEngine templateEngine;
     private final TemplateConfiguration templateConfiguration;
 
-    public MailServiceImpl(JavaMailSender mailSender, TemplateEngine templateEngine, TemplateConfiguration templateConfiguration) {
+    public MailServiceImpl(JavaMailSender mailSender,
+                           TemplateEngine templateEngine,
+                           TemplateConfiguration templateConfiguration) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
         this.templateConfiguration = templateConfiguration;
@@ -29,26 +32,30 @@ public class MailServiceImpl implements NotificationService {
 
     @Override
     @SneakyThrows
-    public void sendOTP(NotificationDto dto) {
+    public void sendOTP(NotificationDto req) {
+
+        if (!(req instanceof EmailReqDto dto) || !dto.isValid()) {
+            throw new RuntimeException("Invalid request");
+        }
+        validationFields(dto.template(), dto.value().keySet());
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         Context context = new Context();
 
-        validationFields(dto.getTemplate(), dto.getValue().keySet());
         String htmlContent;
-        dto.getValue().forEach(context::setVariable);
+        dto.value().forEach(context::setVariable);
 
-        switch (dto.getTemplate()) {
+        switch (dto.template()) {
+            case ACCOUNT_VERIFICATION -> htmlContent = templateEngine.process("AccountVerification.html", context);
             case PAYMENT_CREATE -> htmlContent = templateEngine.process("PaymentCreation.html", context);
             case PAYMENT_PERFORM -> htmlContent = templateEngine.process("PaymentPerform.html", context);
-            case ACCOUNT_VERIFICATION -> htmlContent = templateEngine.process("AccountVerification.html", context);
             default -> throw new RuntimeException("Invalid template");
         }
 
-        helper.setTo(dto.getReceiver());
-        helper.setSubject(dto.getTitle());
+        helper.setTo(dto.receiver());
+        helper.setSubject(dto.title());
         helper.setText(htmlContent, true);
         mailSender.send(message);
     }
@@ -58,4 +65,5 @@ public class MailServiceImpl implements NotificationService {
         if (templateConfiguration.getConfig(template).stream().anyMatch(field -> !set.contains(field)))
             throw new RuntimeException("Invalid template");
     }
+
 }
