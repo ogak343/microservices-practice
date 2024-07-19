@@ -38,6 +38,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Long create(Long orderId) {
 
+        //Reminder: actual payment logic here
+        //It is just a mock payment
+
         var order = orderClient.getOrder(orderId);
 
         if (order.getStatus() != Status.WAITING_FOR_PAYMENT)
@@ -56,6 +59,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public String perform(PaymentPerformDto dto) {
+
+        //Reminder: actual payment logic here
+        //It is just a mock payment
 
         var optionalOtp = otpRepository.findByIdAndExpiredAtAfter(dto.otpId(), OffsetDateTime.now());
 
