@@ -26,7 +26,7 @@ public class KeyCloakService {
     public void createUser(KeyCloakCreate keycloakCreate) {
         keycloakClient
                 .post()
-                .uri(configData.getAuthServerUrl())
+                .uri(configData.getAdminUri())
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(getToken()))
                 .body(keycloakCreate, KeyCloakCreate.class)
                 .retrieve()
@@ -68,7 +68,7 @@ public class KeyCloakService {
     private String getToken() {
         return keycloakClient
                 .post()
-                .uri(configData.getAuthServerUrl())
+                .uri(configData.getTokenUri())
                 .body(new KeyCloakLogin(configData.getGrantType(), configData.getClientId(), configData.getClientSecret()),
                         KeyCloakLogin.class)
                 .retrieve()

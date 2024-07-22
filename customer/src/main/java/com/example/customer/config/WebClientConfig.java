@@ -17,7 +17,7 @@ public class WebClientConfig {
     public WebClient webClient() {
         return WebClient
                 .builder()
-                .baseUrl(keycloakConfigData.getAuthServerUrl())
+                .baseUrl(keycloakConfigData.getUrl())
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }

@@ -10,8 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class KeycloakConfigData {
 
-    @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
-    private String authServerUrl;
+    @Value("${spring.security.oauth2.keycloak-host}")
+    private String url;
+    @Value("${spring.security.oauth2.keycloak-admin}")
+    private String adminUri;
+    @Value("${spring.security.oauth2.client.provider.keycloak.token-uri}")
+    private String tokenUri;
     @Value("${spring.security.oauth2.keycloak-realm}")
     private String realm;
     @Value("${spring.security.oauth2.client.registration.keycloak.client-id}")
