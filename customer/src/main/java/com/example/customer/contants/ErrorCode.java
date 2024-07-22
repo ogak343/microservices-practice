@@ -11,7 +11,8 @@ public enum ErrorCode {
     WRONG_PASSWORD(403),
     WRONG_CREDENTIALS(403),
     CUSTOMER_NOT_FOUND(404),
-    USER_NOT_FOUND_IN_CACHE(404);
+    USER_NOT_FOUND_IN_CACHE(404),
+    KEYCLOAK_SIDE_ERROR(503);
 
     private final int code;
 

@@ -1,11 +1,17 @@
 package com.example.customer.mapper;
 
+import com.example.customer.dto.KeyCloakCreate;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
 import com.example.customer.dto.resp.CustomerResp;
 import com.example.customer.entity.Customer;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.mapstruct.*;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -19,5 +25,6 @@ public interface CustomerMapper {
     void update(@MappingTarget Customer entity, CustomerUpdateReq updateDto);
 
     @Mapping(target = "username", source = "email")
-    UserRepresentation toKeycloakCreate(Customer customer);
+    @Mapping(target = "credentials", source = "")
+    KeyCloakCreate toKeycloakCreate(Customer customer);
 }

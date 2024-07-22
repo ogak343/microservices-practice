@@ -1,6 +1,7 @@
 package com.example.customer.service.impl;
 
 import com.example.customer.contants.ErrorCode;
+import com.example.customer.dto.KeyCloakCreate;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
@@ -9,14 +10,13 @@ import com.example.customer.dto.resp.ConfirmResp;
 import com.example.customer.entity.Customer;
 import com.example.customer.entity.OTP;
 import com.example.customer.config.exception.CustomException;
+import com.example.customer.external.KeyCloakService;
 import com.example.customer.mapper.CustomerMapper;
 import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;
 import com.example.customer.service.CustomerService;
 import com.example.customer.service.helper.KafkaPublisher;
-import lombok.RequiredArgsConstructor;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,11 +24,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository repository;
@@ -36,7 +34,24 @@ public class CustomerServiceImpl implements CustomerService {
     private final OTPRepository otpRepository;
     private final KafkaPublisher kafkaPublisher;
     private final BCryptPasswordEncoder encoder;
-    private final RealmResource realmResource;
+    private final KeyCloakService keyCloakService;
+
+    @Autowired
+    public CustomerServiceImpl(
+            CustomerRepository repository,
+            CustomerMapper mapper,
+            OTPRepository otpRepository,
+            KafkaPublisher kafkaPublisher,
+            BCryptPasswordEncoder encoder,
+            KeyCloakService keyCloakService
+    ) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.otpRepository = otpRepository;
+        this.kafkaPublisher = kafkaPublisher;
+        this.encoder = encoder;
+        this.keyCloakService = keyCloakService;
+    }
 
     @Override
     public Long create(CustomerCreateReq create) {
@@ -46,12 +61,12 @@ public class CustomerServiceImpl implements CustomerService {
 
         var customer = mapper.toEntity(create);
 
-        realmResource.users().create(mapper.toKeycloakCreate(customer));
+        keyCloakService.createUser(new KeyCloakCreate(create.getEmail(), create.getPassword()));
 
         customer.setPassword(encoder.encode(create.getPassword()));
         customer = repository.save(customer);
 
-        fetchKeycloakDetails(customer.getEmail(), create.getPassword());
+        fetchKeycloakDetails(customer.getEmail());
         var otp = otpRepository.save(new OTP(customer));
         kafkaPublisher.sendOTP(otp);
 
@@ -73,7 +88,7 @@ public class CustomerServiceImpl implements CustomerService {
         var customer = otp.getCustomer();
         customer.setActive(true);
 
-        enableKeycloakUser(customer.getEmail());
+        enableKeycloakUser(customer.getKeycloakUserId());
 
         repository.save(customer);
         otpRepository.deleteOTPByCustomerId(customer.getId());
@@ -131,42 +146,21 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Async(value = "async")
-    public void enableKeycloakUser(String username) {
+    public void enableKeycloakUser(String userId) {
 
-        var resp = realmResource.users().searchByUsername(username, true);
-
-        if (resp.isEmpty())
-            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
-
-        var user = resp.get(0);
-        user.setEmailVerified(true);
-        user.setEnabled(true);
-
-        realmResource.users().get(user.getId()).update(user);
+        keyCloakService.enableUser(userId);
     }
 
     @Async(value = "async")
-    public void fetchKeycloakDetails(String email, String password) {
+    public void fetchKeycloakDetails(String email) {
 
-        var resp = realmResource.users().searchByUsername(email, true);
-
-        if (resp.isEmpty())
-            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
+        var userId = keyCloakService.searchByUsername(email);
 
         var entity = repository.findByEmail(email)
-                .orElseThrow(()-> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
 
-        var data = resp.get(0);
-
-        entity.setKeycloakUserId(data.getId());
+        entity.setKeycloakUserId(userId);
         repository.save(entity);
-        CredentialRepresentation credentials = new CredentialRepresentation();
 
-        credentials.setTemporary(false);
-        credentials.setType(CredentialRepresentation.PASSWORD);
-        credentials.setValue(password);
-        data.setCredentials(List.of(credentials));
-
-        realmResource.users().get(entity.getKeycloakUserId()).update(data);
     }
 }
