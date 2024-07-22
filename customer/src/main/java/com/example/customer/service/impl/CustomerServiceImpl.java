@@ -1,13 +1,11 @@
 package com.example.customer.service.impl;
 
 import com.example.customer.contants.ErrorCode;
-import com.example.customer.contants.ClientType;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
-import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
-import com.example.customer.dto.resp.LoginResp;
+import com.example.customer.dto.resp.ConfirmResp;
 import com.example.customer.entity.Customer;
 import com.example.customer.entity.OTP;
 import com.example.customer.config.exception.CustomException;
@@ -15,16 +13,18 @@ import com.example.customer.mapper.CustomerMapper;
 import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;
 import com.example.customer.service.CustomerService;
-import com.example.customer.service.JwtService;
 import com.example.customer.service.helper.KafkaPublisher;
-import com.example.customer.service.helper.RedisService;
 import lombok.RequiredArgsConstructor;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -36,8 +36,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final OTPRepository otpRepository;
     private final KafkaPublisher kafkaPublisher;
     private final BCryptPasswordEncoder encoder;
-    private final JwtService jwtService;
-    private final RedisService redisService;
+    private final RealmResource realmResource;
 
     @Override
     public Long create(CustomerCreateReq create) {
@@ -46,10 +45,13 @@ public class CustomerServiceImpl implements CustomerService {
             throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
 
         var customer = mapper.toEntity(create);
-        customer.setPassword(encoder.encode(create.getPassword()));
 
+        realmResource.users().create(mapper.toKeycloakCreate(customer));
+
+        customer.setPassword(encoder.encode(create.getPassword()));
         customer = repository.save(customer);
 
+        fetchKeycloakDetails(customer.getEmail(), create.getPassword());
         var otp = otpRepository.save(new OTP(customer));
         kafkaPublisher.sendOTP(otp);
 
@@ -57,7 +59,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public LoginResp confirm(CustomerConfirmReq confirmReq) {
+    public ConfirmResp confirm(CustomerConfirmReq confirmReq) {
 
         var otp = otpRepository.findById(confirmReq.getOtpId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_OTP));
@@ -70,26 +72,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         var customer = otp.getCustomer();
         customer.setActive(true);
+
+        enableKeycloakUser(customer.getEmail());
+
         repository.save(customer);
         otpRepository.deleteOTPByCustomerId(customer.getId());
 
-        redisService.save(customer.getId(), customer.getEmail());
-
-        return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
-    }
-
-    @Override
-    public LoginResp login(LoginReq login) {
-
-        var customer = repository.findByEmailAndActiveTrueAndDeletedAtIsNull(login.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
-
-        if (!encoder.matches(login.getPassword(), customer.getPassword()))
-            throw new CustomException(ErrorCode.WRONG_PASSWORD);
-
-        redisService.save(customer.getId(), customer.getEmail());
-
-        return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
+        return new ConfirmResp(200, "Account has been confirmed");
     }
 
     @Override
@@ -103,13 +92,11 @@ public class CustomerServiceImpl implements CustomerService {
 
         validateAccess(updateDto.getId());
 
-        // Nimaga customer id dto dan olgansiz, Security contextdan olsa bomidi?
         var entity = getById(getCustomerId());
 
         mapper.update(entity, updateDto);
         entity = repository.save(entity);
 
-        redisService.save(entity.getId(), entity.getEmail());
         return mapper.toResp(entity);
     }
 
@@ -120,7 +107,6 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setActive(false);
         customer.setDeletedAt(new Timestamp(System.currentTimeMillis()));
         repository.save(customer);
-        redisService.remove(getCustomerId());
     }
 
     private Long getCustomerId() {
@@ -142,5 +128,45 @@ public class CustomerServiceImpl implements CustomerService {
     private Customer getById(Long id) {
         return repository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+    }
+
+    @Async(value = "async")
+    public void enableKeycloakUser(String username) {
+
+        var resp = realmResource.users().searchByUsername(username, true);
+
+        if (resp.isEmpty())
+            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
+
+        var user = resp.get(0);
+        user.setEmailVerified(true);
+        user.setEnabled(true);
+
+        realmResource.users().get(user.getId()).update(user);
+    }
+
+    @Async(value = "async")
+    public void fetchKeycloakDetails(String email, String password) {
+
+        var resp = realmResource.users().searchByUsername(email, true);
+
+        if (resp.isEmpty())
+            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
+
+        var entity = repository.findByEmail(email)
+                .orElseThrow(()-> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+
+        var data = resp.get(0);
+
+        entity.setKeycloakUserId(data.getId());
+        repository.save(entity);
+        CredentialRepresentation credentials = new CredentialRepresentation();
+
+        credentials.setTemporary(false);
+        credentials.setType(CredentialRepresentation.PASSWORD);
+        credentials.setValue(password);
+        data.setCredentials(List.of(credentials));
+
+        realmResource.users().get(entity.getKeycloakUserId()).update(data);
     }
 }

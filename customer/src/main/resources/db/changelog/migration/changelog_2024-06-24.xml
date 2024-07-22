@@ -48,4 +48,16 @@
         </createIndex>
     </changeSet>
 
+
+    <changeSet id="2024-07-22" author="Ogabek">
+        <addColumn tableName="customer">
+            <column name="deleted_at" type="timestamp"/>
+        </addColumn>
+
+        <addColumn tableName="customer">
+            <column name="keycloak_user_id" type="varchar"/>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>

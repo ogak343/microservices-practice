@@ -4,6 +4,7 @@ import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
 import com.example.customer.dto.resp.CustomerResp;
 import com.example.customer.entity.Customer;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring",
@@ -16,4 +17,7 @@ public interface CustomerMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void update(@MappingTarget Customer entity, CustomerUpdateReq updateDto);
+
+    @Mapping(target = "username", source = "email")
+    UserRepresentation toKeycloakCreate(Customer customer);
 }

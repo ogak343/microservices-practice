@@ -3,9 +3,8 @@ package com.example.customer.controller;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
-import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
-import com.example.customer.dto.resp.LoginResp;
+import com.example.customer.dto.resp.ConfirmResp;
 import com.example.customer.service.CustomerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -36,20 +35,11 @@ public class CustomerController {
 
     @PostMapping("/confirm")
     @PreAuthorize(value = "hasRole('CUSTOMER')")
-    public ResponseEntity<LoginResp> confirm(@RequestBody @Valid CustomerConfirmReq customer) {
+    public ResponseEntity<ConfirmResp> confirm(@RequestBody @Valid CustomerConfirmReq customer) {
 
         log.info("CustomerConfirmReq: {}", customer);
 
         return ResponseEntity.ok(service.confirm(customer));
-    }
-
-    @PostMapping("/login")
-    @PreAuthorize(value = "hasRole('CUSTOMER')")
-    public ResponseEntity<LoginResp> login(@RequestBody @Valid LoginReq login) {
-
-        log.info("CustomerLoginReq: {}", login);
-
-        return ResponseEntity.ok(service.login(login));
     }
 
     @GetMapping("/profile")

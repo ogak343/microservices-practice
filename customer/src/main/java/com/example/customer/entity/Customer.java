@@ -20,6 +20,8 @@ public class Customer {
     private String email;
     private String password;
     private String address;
+    @Column(name = "keycloak_user_id")
+    private String keycloakUserId;
     private boolean active;
     private Timestamp deletedAt;
 }
