@@ -24,6 +24,29 @@ spring:
       autoconfiguration:
         jackson:
           enabled: true
+  security:
+    oauth2:
+      keycloak-url: http://127.0.0.1:8090
+      keycloak-realm: master  #You have to create realm "online-store" in keycloak
+      keycloak-base: ${spring.security.oauth2.keycloak-url}/realms/${spring.security.oauth2.keycloak-realm}
+      resourceserver:
+        jwt:
+          issuer-uri: ${spring.security.oauth2.keycloak-base}
+          jwk-set-uri: ${spring.security.oauth2.keycloak-base}/protocol/openid-connect/certs
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${spring.security.oauth2.keycloak-base}
+            token-uri: ${spring.security.oauth2.keycloak-base}/protocol/openid-connect/token
+            user-info-uri: ${spring.security.oauth2.keycloak-base}/protocol/openid-connect/userinfo
+            authorization-uri: ${spring.security.oauth2.keycloak-base}/protocol/openid-connect/auth
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: customer-service #You have to create client "customer-service" in keycloak
+            client-secret: 58zgNRKCYEDnOexkV1VbCg96yZ9tEfkc #client secret here
+            authorization-grant-type: client_credentials
 server:
   port: 8082
 feign:
@@ -41,4 +64,3 @@ kafka:
     modify_product: topic_modify_product
 
 jwt:
-  secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711
