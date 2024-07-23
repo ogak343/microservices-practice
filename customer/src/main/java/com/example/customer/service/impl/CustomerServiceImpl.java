@@ -5,8 +5,10 @@ import com.example.customer.dto.KeyCloakCreate;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
+import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
 import com.example.customer.dto.resp.ConfirmResp;
+import com.example.customer.dto.resp.LoginResp;
 import com.example.customer.entity.Customer;
 import com.example.customer.entity.OTP;
 import com.example.customer.config.exception.CustomException;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -57,7 +60,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Long create(CustomerCreateReq create) {
 
         if (repository.existsByEmail(create.getEmail()))
-            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
+            throw new CustomException(ErrorCode.CUSTOMER_EXISTS);
 
         var customer = mapper.toEntity(create);
 
@@ -97,6 +100,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public LoginResp login(LoginReq dto) {
+        return new LoginResp(200, "Login succeeded", keyCloakService.login(dto));
+    }
+
+    @Override
     public CustomerResp profile() {
         var customer = getCustomerId();
         return mapper.toResp(getById(customer));
@@ -104,8 +112,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResp update(CustomerUpdateReq updateDto) {
-
-        validateAccess(updateDto.getId());
 
         var entity = getById(getCustomerId());
 
@@ -121,27 +127,18 @@ public class CustomerServiceImpl implements CustomerService {
         var customer = getById(getCustomerId());
         customer.setActive(false);
         customer.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+        keyCloakService.deleteUser(customer.getKeycloakUserId());
         repository.save(customer);
     }
 
-    private Long getCustomerId() {
-        try {
-            return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        } catch (ClassCastException e) {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
-        }
+    private String getCustomerId() {
+
+        var jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return jwt.getSubject();
     }
 
-    private void validateAccess(Long id) {
-
-        var customerId = getCustomerId();
-
-        if (!Objects.equals(customerId, id))
-            throw new CustomException(ErrorCode.WRONG_CREDENTIALS);
-    }
-
-    private Customer getById(Long id) {
-        return repository.findByIdAndDeletedAtIsNull(id)
+    private Customer getById(String keycloakUserId) {
+        return repository.findByKeycloakUserIdAndDeletedAtIsNull(keycloakUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
     }
 

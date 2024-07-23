@@ -4,8 +4,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 465
-    username: # gmail account
-    password: #2-step app verification password from gmail
+    username: khamdamov343@gmail.com
+    password: lmqptmcnehcfdmoo
     protocol: smtps
     default-encoding: UTF-8
   # sender: can be set Sender linked to username

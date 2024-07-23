@@ -70,15 +70,15 @@ services:
       KAFKA_CREATE_TOPICS: "orderCreationTopic,otp"
     networks:
       - microservices-network
-  redis:
-    image: redis
-    container_name: redis_container
-    ports:
-      - "6379:6379"
-    environment:
-      REDIS_PASSWORD: redis_password
-    volumes:
-      - redis_data:/data
+#  redis:
+#    image: redis
+#    container_name: redis_container
+#    ports:
+#      - "6379:6379"
+#    environment:
+#      REDIS_PASSWORD: redis_password
+#    volumes:
+#      - redis_data:/data
 #  zipkin:
 #    container_name: zipkin
 #    image: openzipkin/zipkin

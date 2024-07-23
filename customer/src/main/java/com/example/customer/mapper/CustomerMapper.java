@@ -1,6 +1,5 @@
 package com.example.customer.mapper;
 
-import com.example.customer.dto.KeyCloakCreate;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
 import com.example.customer.dto.resp.CustomerResp;
@@ -11,7 +10,6 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -24,7 +22,4 @@ public interface CustomerMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void update(@MappingTarget Customer entity, CustomerUpdateReq updateDto);
 
-    @Mapping(target = "username", source = "email")
-    @Mapping(target = "credentials", source = "")
-    KeyCloakCreate toKeycloakCreate(Customer customer);
 }

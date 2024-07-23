@@ -3,8 +3,10 @@ package com.example.customer.controller;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
+import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
 import com.example.customer.dto.resp.ConfirmResp;
+import com.example.customer.dto.resp.LoginResp;
 import com.example.customer.service.CustomerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -31,6 +33,13 @@ public class CustomerController {
         log.info("CustomerCreateReq: {}", customer);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(customer));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResp> login(@RequestBody @Valid LoginReq dto) {
+
+        log.info("LoginReq: {}", dto);
+        return ResponseEntity.ok(service.login(dto));
     }
 
     @PostMapping("/confirm")

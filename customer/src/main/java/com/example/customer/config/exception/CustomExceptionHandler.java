@@ -32,7 +32,7 @@ public class CustomExceptionHandler {
 
         var code = ex.getErrorCode().getCode();
 
-        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Service error", ex.getErrorCode().name()));
+        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Custom error", ex.getErrorCode().name()));
 
     }
 
@@ -40,7 +40,7 @@ public class CustomExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorResponse<String>> handleGeneralException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse<>(500, "Internal server error:", ex.getMessage()));
+                .body(new ErrorResponse<>(500, "Internal server error:", ex.getLocalizedMessage()));
     }
 }
 

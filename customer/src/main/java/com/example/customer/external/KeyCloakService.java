@@ -1,18 +1,25 @@
 package com.example.customer.external;
 
 import com.example.customer.config.KeycloakConfigData;
+import com.example.customer.config.exception.CustomException;
+import com.example.customer.contants.ErrorCode;
 import com.example.customer.dto.KeyCloakCreate;
+import com.example.customer.dto.req.LoginReq;
 import com.example.customer.utils.ParserUtil;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 public class KeyCloakService {
 
+    private static final Logger log = LoggerFactory.getLogger(KeyCloakService.class);
     private final KeycloakConfigData configData;
     private final WebClient keycloakClient;
 
@@ -24,77 +31,109 @@ public class KeyCloakService {
     }
 
     public void createUser(KeyCloakCreate keycloakCreate) {
+
         keycloakClient
                 .post()
-                .uri(configData.getAdminUri())
+                .uri(configData.getAdminPath() + "/users")
+                .header("Content-Type", "application/json")
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(getToken()))
-                .body(keycloakCreate, KeyCloakCreate.class)
+                .bodyValue(keycloakCreate)
                 .retrieve()
-                .onStatus(status -> !status.is2xxSuccessful(), response -> {
-                    throw new RuntimeException();
-                });
+                .toBodilessEntity()
+                .then()
+                .doOnError(WebClientResponseException.class, ex -> log.error("Error response: {}", ex.getMessage(), ex))
+                .block();
     }
 
     public void enableUser(String userId) {
 
         keycloakClient
                 .put()
-                .uri(uriBuilder -> uriBuilder.path("/" + userId).build())
+                .uri(uriBuilder -> uriBuilder.path(configData.getAdminPath() + "/users/" + userId).build())
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(getToken()))
-                .body(new KeyCloakUpdate(true), KeyCloakUpdate.class)
+                .bodyValue(new KeyCloakUpdate(true, true))
                 .retrieve()
-                .onStatus(status -> !status.is2xxSuccessful(), response -> {
-                    throw new RuntimeException("Failed to enable user");
-                });
+                .toBodilessEntity()
+                .then()
+                .doOnError(WebClientResponseException.class, ex -> log.error("Error response: {}", ex.getMessage(), ex)
+                ).block();
 
     }
 
     public String searchByUsername(String email) {
         var respDto = keycloakClient
                 .get()
-                .uri(url -> url.path("")
+                .uri(url -> url.path(configData.getAdminPath() + "/users")
                         .queryParam("username", email)
                         .build()
                 )
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(getToken()))
                 .retrieve()
-                .bodyToMono(KeyCloakUserDto.class).block();
+                .bodyToFlux(KeyCloakUserDto.class)
+                .map(KeyCloakUserDto::id)
+                .blockFirst();
 
         if (respDto == null) throw new RuntimeException("Null response");
 
-        return respDto.id;
+        return respDto;
+    }
+
+    public String login(LoginReq dto) {
+        return keycloakClient
+                .post()
+                .uri(configData.getTokenPath())
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(BodyInserters
+                        .fromFormData("client_id", configData.getClientId())
+                        .with("client_secret", configData.getClientSecret())
+                        .with("grant_type", "password")
+                        .with("username", dto.email())
+                        .with("password", dto.password()))
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(WebClientResponseException.class, ex -> {
+                    throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+                })
+                .map(resp -> ParserUtil.parseToString(resp, "access_token")).block();
     }
 
     private String getToken() {
+
         return keycloakClient
                 .post()
-                .uri(configData.getTokenUri())
-                .body(new KeyCloakLogin(configData.getGrantType(), configData.getClientId(), configData.getClientSecret()),
-                        KeyCloakLogin.class)
+                .uri(configData.getTokenPath())
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(BodyInserters
+                        .fromFormData("client_id", configData.getClientId())
+                        .with("client_secret", configData.getClientSecret())
+                        .with("grant_type", configData.getGrantType()))
                 .retrieve()
                 .bodyToMono(String.class)
-                .map(resp-> ParserUtil.parseToString(resp, "access_token")).block();
+                .map(resp -> ParserUtil.parseToString(resp, "access_token")).block();
 
     }
 
+    public void deleteUser(String keycloakUserId) {
+        keycloakClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder.path(configData.getAdminPath() + "/users/" + keycloakUserId).build())
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(getToken()))
+                .retrieve()
+                .toBodilessEntity()
+                .then()
+                .doOnError(WebClientResponseException.class, ex -> log.error("Error response: {}", ex.getMessage(), ex)
+                ).block();
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record KeyCloakUserDto(
+    public record KeyCloakUserDto(
             String id
     ) {
     }
 
-    private record KeyCloakLogin(
-            @JsonProperty("grant_type")
-            String grantType,
-            @JsonProperty("client_id")
-            String clientId,
-            @JsonProperty("client_secret")
-            String clientSecret
-    ) {
-    }
-
-    private record KeyCloakUpdate(
-            boolean enabled
+    public record KeyCloakUpdate(
+            Boolean enabled,
+            Boolean emailVerified
     ) {
     }
 }
