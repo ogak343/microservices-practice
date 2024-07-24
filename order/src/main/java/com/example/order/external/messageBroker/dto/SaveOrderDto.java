@@ -14,10 +14,10 @@ import java.util.Set;
 public class SaveOrderDto {
 
     private Long orderId;
-    private Long customerId;
+    private String customerId;
     private Set<ProductResp> products;
 
-    public SaveOrderDto(Long customerId, OrderedProductResp products) {
+    public SaveOrderDto(String customerId, OrderedProductResp products) {
         this.customerId = customerId;
         this.products = products.getProducts();
     }

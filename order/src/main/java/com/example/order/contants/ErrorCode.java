@@ -8,7 +8,8 @@ public enum ErrorCode {
     INVALID_TOKEN(401),
     ORDER_NOT_FOUND(404),
     PRODUCT_DETAIL_NOT_FOUND(404),
-    INVALID_TOPIC(500);
+    INVALID_TOPIC(500),
+    PRODUCT_ORDER_FAILED(500);
 
     private final int code;
 
