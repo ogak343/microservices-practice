@@ -7,7 +7,7 @@ import com.example.payment.dto.EmailReqDto;
 import com.example.payment.dto.PaymentPerformDto;
 import com.example.payment.entity.Payment;
 import com.example.payment.entity.PaymentOtp;
-import com.example.payment.exception.CustomException;
+import com.example.payment.config.exception.CustomException;
 import com.example.payment.external.feign.OrderClient;
 import com.example.payment.external.feign.dto.OrderResp;
 import com.example.payment.external.feign.dto.Status;

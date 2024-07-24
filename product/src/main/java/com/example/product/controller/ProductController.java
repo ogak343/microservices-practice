@@ -26,6 +26,7 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
     public ResponseEntity<ProductResp> create(@RequestBody @Valid ProductCreateReq product) {
 
         log.info("Create product: {}", product);
@@ -61,6 +62,7 @@ public class ProductController {
     }
 
     @PatchMapping
+    @PreAuthorize(value = "hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ProductResp> update(@RequestBody @Valid ProductUpdateReq product) {
 
         log.info("Update product: {}", product);
@@ -69,7 +71,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize(value = "hasRole('ADMIN')")
+    @PreAuthorize(value = "hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
 
         log.info("Delete product: {}", id);
@@ -77,6 +79,4 @@ public class ProductController {
         service.delete(id);
         return ResponseEntity.ok().build();
     }
-
-
 }

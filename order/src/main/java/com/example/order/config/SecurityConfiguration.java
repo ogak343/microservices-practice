@@ -59,7 +59,7 @@ public class SecurityConfiguration {
             List<String> roles = (List<String>) realmAccess.get("roles");
             if (Objects.nonNull(roles)) {
                 return roles.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
                         .collect(Collectors.toList());
             }
             return Collections.EMPTY_LIST;

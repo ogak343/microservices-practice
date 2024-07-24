@@ -1,17 +1,15 @@
-package com.example.payment.exception;
+package com.example.payment.config.exception;
 
 import com.example.payment.constants.ErrorCode;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 public class CustomException extends RuntimeException {
 
-    private int code;
+    private final ErrorCode errorCode;
 
     public CustomException(ErrorCode errorCode) {
         super(errorCode.name());
-        this.code = errorCode.getCode();
+        this.errorCode = errorCode;
     }
 }
