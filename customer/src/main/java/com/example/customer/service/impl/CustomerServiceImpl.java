@@ -1,26 +1,28 @@
 package com.example.customer.service.impl;
 
 import com.example.customer.contants.ErrorCode;
-import com.example.customer.contants.ClientType;
+import com.example.customer.dto.KeyCloakCreate;
 import com.example.customer.dto.req.CustomerConfirmReq;
 import com.example.customer.dto.req.CustomerCreateReq;
 import com.example.customer.dto.req.CustomerUpdateReq;
 import com.example.customer.dto.req.LoginReq;
 import com.example.customer.dto.resp.CustomerResp;
+import com.example.customer.dto.resp.ConfirmResp;
 import com.example.customer.dto.resp.LoginResp;
 import com.example.customer.entity.Customer;
 import com.example.customer.entity.OTP;
 import com.example.customer.config.exception.CustomException;
+import com.example.customer.external.KeyCloakService;
 import com.example.customer.mapper.CustomerMapper;
 import com.example.customer.repository.CustomerRepository;
 import com.example.customer.repository.OTPRepository;
 import com.example.customer.service.CustomerService;
-import com.example.customer.service.JwtService;
 import com.example.customer.service.helper.KafkaPublisher;
-import com.example.customer.service.helper.RedisService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -28,7 +30,6 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository repository;
@@ -36,20 +37,39 @@ public class CustomerServiceImpl implements CustomerService {
     private final OTPRepository otpRepository;
     private final KafkaPublisher kafkaPublisher;
     private final BCryptPasswordEncoder encoder;
-    private final JwtService jwtService;
-    private final RedisService redisService;
+    private final KeyCloakService keyCloakService;
+
+    @Autowired
+    public CustomerServiceImpl(
+            CustomerRepository repository,
+            CustomerMapper mapper,
+            OTPRepository otpRepository,
+            KafkaPublisher kafkaPublisher,
+            BCryptPasswordEncoder encoder,
+            KeyCloakService keyCloakService
+    ) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.otpRepository = otpRepository;
+        this.kafkaPublisher = kafkaPublisher;
+        this.encoder = encoder;
+        this.keyCloakService = keyCloakService;
+    }
 
     @Override
     public Long create(CustomerCreateReq create) {
 
         if (repository.existsByEmail(create.getEmail()))
-            throw new CustomException(ErrorCode.CUSTOMER_NOT_FOUND);
+            throw new CustomException(ErrorCode.CUSTOMER_EXISTS);
 
         var customer = mapper.toEntity(create);
-        customer.setPassword(encoder.encode(create.getPassword()));
 
+        keyCloakService.createUser(new KeyCloakCreate(create.getEmail(), create.getPassword()));
+
+        customer.setPassword(encoder.encode(create.getPassword()));
         customer = repository.save(customer);
 
+        fetchKeycloakDetails(customer.getEmail());
         var otp = otpRepository.save(new OTP(customer));
         kafkaPublisher.sendOTP(otp);
 
@@ -57,7 +77,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public LoginResp confirm(CustomerConfirmReq confirmReq) {
+    public ConfirmResp confirm(CustomerConfirmReq confirmReq) {
 
         var otp = otpRepository.findById(confirmReq.getOtpId())
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_OTP));
@@ -70,26 +90,18 @@ public class CustomerServiceImpl implements CustomerService {
 
         var customer = otp.getCustomer();
         customer.setActive(true);
+
+        enableKeycloakUser(customer.getKeycloakUserId());
+
         repository.save(customer);
         otpRepository.deleteOTPByCustomerId(customer.getId());
 
-        redisService.save(customer.getId(), customer.getEmail());
-
-        return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
+        return new ConfirmResp(200, "Account has been confirmed");
     }
 
     @Override
-    public LoginResp login(LoginReq login) {
-
-        var customer = repository.findByEmailAndActiveTrueAndDeletedAtIsNull(login.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
-
-        if (!encoder.matches(login.getPassword(), customer.getPassword()))
-            throw new CustomException(ErrorCode.WRONG_PASSWORD);
-
-        redisService.save(customer.getId(), customer.getEmail());
-
-        return new LoginResp(200, "Success", jwtService.generateToken(customer.getId(), ClientType.CUSTOMER));
+    public LoginResp login(LoginReq dto) {
+        return new LoginResp(200, "Login succeeded", keyCloakService.login(dto));
     }
 
     @Override
@@ -101,15 +113,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerResp update(CustomerUpdateReq updateDto) {
 
-        validateAccess(updateDto.getId());
-
-        // Nimaga customer id dto dan olgansiz, Security contextdan olsa bomidi?
         var entity = getById(getCustomerId());
 
         mapper.update(entity, updateDto);
         entity = repository.save(entity);
 
-        redisService.save(entity.getId(), entity.getEmail());
         return mapper.toResp(entity);
     }
 
@@ -119,28 +127,37 @@ public class CustomerServiceImpl implements CustomerService {
         var customer = getById(getCustomerId());
         customer.setActive(false);
         customer.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+        keyCloakService.deleteUser(customer.getKeycloakUserId());
         repository.save(customer);
-        redisService.remove(getCustomerId());
     }
 
-    private Long getCustomerId() {
-        try {
-            return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        } catch (ClassCastException e) {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
-        }
+    private String getCustomerId() {
+
+        var jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return jwt.getSubject();
     }
 
-    private void validateAccess(Long id) {
-
-        var customerId = getCustomerId();
-
-        if (!Objects.equals(customerId, id))
-            throw new CustomException(ErrorCode.WRONG_CREDENTIALS);
-    }
-
-    private Customer getById(Long id) {
-        return repository.findByIdAndDeletedAtIsNull(id)
+    private Customer getById(String keycloakUserId) {
+        return repository.findByKeycloakUserIdAndDeletedAtIsNull(keycloakUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+    }
+
+    @Async(value = "async")
+    public void enableKeycloakUser(String userId) {
+
+        keyCloakService.enableUser(userId);
+    }
+
+    @Async(value = "async")
+    public void fetchKeycloakDetails(String email) {
+
+        var userId = keyCloakService.searchByUsername(email);
+
+        var entity = repository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.CUSTOMER_NOT_FOUND));
+
+        entity.setKeycloakUserId(userId);
+        repository.save(entity);
+
     }
 }

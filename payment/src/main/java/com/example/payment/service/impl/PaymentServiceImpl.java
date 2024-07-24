@@ -7,7 +7,7 @@ import com.example.payment.dto.EmailReqDto;
 import com.example.payment.dto.PaymentPerformDto;
 import com.example.payment.entity.Payment;
 import com.example.payment.entity.PaymentOtp;
-import com.example.payment.exception.CustomException;
+import com.example.payment.config.exception.CustomException;
 import com.example.payment.external.feign.OrderClient;
 import com.example.payment.external.feign.dto.OrderResp;
 import com.example.payment.external.feign.dto.Status;
@@ -15,10 +15,10 @@ import com.example.payment.repo.OtpRepository;
 import com.example.payment.repo.PaymentRepository;
 import com.example.payment.service.PaymentService;
 import com.example.payment.service.helper.KafkaPublisher;
-import com.example.payment.service.helper.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -33,7 +33,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderClient orderClient;
     private final KafkaPublisher kafkaPublisher;
     private final OtpRepository otpRepository;
-    private final RedisService redisService;
 
     @Override
     public Long create(Long orderId) {
@@ -90,9 +89,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private String getEmail() {
-        Long customerId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return redisService.getMessage(customerId);
+        return jwt.getSubject();
     }
 
     private EmailReqDto makeOtpDto(Integer otpCode, OrderResp order, String email) {

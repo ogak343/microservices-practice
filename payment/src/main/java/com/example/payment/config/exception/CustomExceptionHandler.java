@@ -1,4 +1,4 @@
-package com.example.customer.config.exception;
+package com.example.payment.config.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 @ControllerAdvice
 public class CustomExceptionHandler {
@@ -33,15 +32,14 @@ public class CustomExceptionHandler {
 
         var code = ex.getErrorCode().getCode();
 
-        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Custom error", ex.getErrorCode().name()));
+        return ResponseEntity.status(code).body(new ErrorResponse<>(code, "Service error", ex.getErrorCode().name()));
 
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponse<String>> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse<>(500, "Internal server error:", ex.getLocalizedMessage()));
+    public ResponseEntity<String> handleGeneralException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error:" + ex.getClass());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -51,4 +49,3 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(403).body(new ErrorResponse<>(403, "forbidden", "Access denied"));
     }
 }
-

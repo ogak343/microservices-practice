@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak
+    environment:
+      DB_VENDOR: h2
+      KEYCLOAK_ADMIN : admin
+      KEYCLOAK_ADMIN_PASSWORD : admin
+    command: start-dev
+    ports:
+      - "8090:8080"
+    volumes:
+      - keycloak_data:/opt/jboss/keycloak/standalone/data
+
   product_db:
     image: postgres:16
     ports:
@@ -58,15 +70,15 @@ services:
       KAFKA_CREATE_TOPICS: "orderCreationTopic,otp"
     networks:
       - microservices-network
-  redis:
-    image: redis
-    container_name: redis_container
-    ports:
-      - "6379:6379"
-    environment:
-      REDIS_PASSWORD: redis_password
-    volumes:
-      - redis_data:/data
+#  redis:
+#    image: redis
+#    container_name: redis_container
+#    ports:
+#      - "6379:6379"
+#    environment:
+#      REDIS_PASSWORD: redis_password
+#    volumes:
+#      - redis_data:/data
 #  zipkin:
 #    container_name: zipkin
 #    image: openzipkin/zipkin
@@ -84,5 +96,7 @@ volumes:
   VOLUME_CUSTOMER_DB:
   VOLUME_ORDER_DB:
   VOLUME_PAYMENT_DB:
+  keycloak_data:
+    driver: local
   redis_data:
     driver: local
