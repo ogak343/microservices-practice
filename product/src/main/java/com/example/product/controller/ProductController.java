@@ -35,7 +35,7 @@ public class ProductController {
     }
 
     @PostMapping("/order/create")
-    @PreAuthorize(value = "hasAuthority('ROLE_SERVICE')")
+    @PreAuthorize(value = "hasAuthority('ROLE_ORDER_SERVICE')")
     public ResponseEntity<OrderedProductResp> createOrder(@RequestBody @Valid OrderCreate order) {
 
         log.info("Create order: {}", order);
