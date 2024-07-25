@@ -1,28 +1,3 @@
 spring:
   application:
-    name: notification-service
-  mail:
-    host: smtp.gmail.com
-    port: 465
-    username: # gmail account
-    password: #2-step app verification password from gmail
-    protocol: smtps
-    default-encoding: UTF-8
-  # sender: can be set Sender linked to username
-server:
-  port: 8090
-
-kafka:
-  topic:
-    email: topicEmail
-    sms: topicSMS
-template:
-  accountVerification:
-    - "otpCode"
-  paymentCreation:
-    - "description"
-    - "price"
-    - "otpCode"
-  paymentPerform:
-    - "message"
-    - "price"
+    name: notification

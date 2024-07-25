@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: eureka
+  cloud:
+    config:
+      enabled: true
+    profiles:
+      active: eureka
+  eureka:
+    client:
+      register-with-eureka: false
+      fetch-registry: false
+      service-url:
+        defaultZone: http://localhost:8888/config/default
+
+server:
+  port: 8761
