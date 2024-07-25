@@ -1,44 +1,48 @@
-package com.example.order.external.client;
+package com.example.order.external;
 
 import com.example.order.config.OrderServiceConfig;
-import com.example.order.config.exception.CustomException;
-import com.example.order.contants.ErrorCode;
 import com.example.order.dto.req.OrderCreate;
 import com.example.order.external.dto.OrderedProductResp;
 import com.example.order.utils.ParserUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
-public class ProductServiceClient {
+@Slf4j
+public class ProductService {
 
-    private final WebClient webClient;
+
+    private final WebClient keycloakWebClient;
+    private final WebClient productWebClient;
     private final OrderServiceConfig config;
 
-    public ProductServiceClient(@Qualifier(value = "product") WebClient webClient,
-                                OrderServiceConfig config) {
-        this.webClient = webClient;
+    public ProductService(@Qualifier(value = "keycloak") WebClient keycloakWebClient,
+                          @Qualifier(value = "product") WebClient productWebClient,
+                          OrderServiceConfig config) {
+        this.keycloakWebClient = keycloakWebClient;
+        this.productWebClient = productWebClient;
         this.config = config;
     }
 
     public OrderedProductResp createOrder(OrderCreate dto) {
 
-        return webClient
+        return productWebClient
                 .post()
+                .uri(uriBuilder -> uriBuilder.path("/products/order/create").build())
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(getToken()))
                 .bodyValue(dto)
                 .retrieve()
-                .onStatus(status -> !status.is2xxSuccessful(), clientResponse -> {
-                    throw new CustomException(ErrorCode.PRODUCT_ORDER_FAILED);
-                })
                 .bodyToMono(OrderedProductResp.class)
-                .block();
+                .doOnError(WebClientResponseException.class, ex -> log.error("Error response: {}", ex.getMessage(), ex)
+                ).block();
     }
 
     private String getToken() {
-        return webClient
+        return keycloakWebClient
                 .post()
                 .uri(config.getTokenPath())
                 .header("Content-Type", "application/x-www-form-urlencoded")

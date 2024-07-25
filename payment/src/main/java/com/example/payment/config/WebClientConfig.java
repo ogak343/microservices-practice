@@ -1,4 +1,4 @@
-package com.example.order.config;
+package com.example.payment.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,18 +8,18 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    @Value("${web.clients.product.url}")
-    private String productServiceUrl;
+    @Value("${web.clients.order.url}")
+    private String orderServiceUrl;
 
     @Value("${spring.security.oauth2.keycloak-url}")
     private String keycloakUrl;
 
-    @Bean(name = "product")
+    @Bean(name = "order")
     public WebClient productClient() {
 
         return WebClient
                 .builder()
-                .baseUrl(productServiceUrl)
+                .baseUrl(orderServiceUrl)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }

@@ -36,8 +36,8 @@ spring:
         registration:
           keycloak:
             provider: keycloak
-            client-id: customer-service #You have to create client "customer-service" in keycloak
-            client-secret: 58zgNRKCYEDnOexkV1VbCg96yZ9tEfkc #client secret here
+            client-id: product-service #You have to create client "customer-service" in keycloak
+            client-secret: otI31mZIV4QDPCqxUnZwSc7emAjojl4r #client secret here
             authorization-grant-type: client_credentials
 server:
   port: 8080

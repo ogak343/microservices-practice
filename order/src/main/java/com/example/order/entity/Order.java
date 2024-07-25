@@ -26,7 +26,7 @@ public class Order {
     @Column(nullable = false)
     private BigInteger totalPrice;
     @Column(nullable = false)
-    private Long customerId;
+    private String customerId;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;

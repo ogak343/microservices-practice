@@ -45,17 +45,15 @@ spring:
         registration:
           keycloak:
             provider: keycloak
-            client-id: customer-service #You have to create client "customer-service" in keycloak
-            client-secret: ayNmMSNXYnzlKdxLJHdyMQuwWPg0HVpJ #client secret here
+            client-id: order-service #You have to create client "customer-service" in keycloak
+            client-secret: Eqc5gOVD7JoRDcOZ6nJ0r2YnPUxk5ZP4 #client secret here
             authorization-grant-type: client_credentials
 server:
   port: 8082
 web:
   clients:
     product:
-      url: http://127.0.0.1:8080
-    customer:
-      url: http://127.0.0.1:8081
+      url: http://127.0.0.1:8082
 kafka:
   topic:
     save_order: topic_save_order

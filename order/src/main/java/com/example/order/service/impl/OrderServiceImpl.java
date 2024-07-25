@@ -9,7 +9,7 @@ import com.example.order.dto.req.OrderCreate;
 import com.example.order.dto.req.OrderUpdate;
 import com.example.order.dto.resp.OrderResp;
 import com.example.order.entity.ProductDetails;
-import com.example.order.external.client.ProductServiceClient;
+import com.example.order.external.ProductService;
 import com.example.order.external.messageBroker.KafkaProducer;
 import com.example.order.external.messageBroker.dto.SaveOrderDto;
 import com.example.order.mapper.OrderMapper;
@@ -32,12 +32,12 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository repository;
     private final OrderMapper mapper;
     private final KafkaProducer kafkaProducer;
-    private final ProductServiceClient productClient;
+    private final ProductService productClient;
 
     public OrderServiceImpl(OrderRepository repository,
                             OrderMapper mapper,
                             KafkaProducer kafkaProducer,
-                            ProductServiceClient productClient) {
+                            ProductService productClient) {
         this.repository = repository;
         this.mapper = mapper;
         this.kafkaProducer = kafkaProducer;
