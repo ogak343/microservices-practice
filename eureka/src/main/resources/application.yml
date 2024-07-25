@@ -1,19 +1,5 @@
 spring:
   application:
-    name: discovery-service
-  cloud:
-    config:
-      enabled: true
-    profiles:
-      active: eureka
-  eureka:
-    client:
-      register-with-eureka: false
-      fetch-registry: false
-      service-url:
-        defaultZone: http://localhost:8888/config-service/default
+    name: eureka
   config:
     import: optional:configserver:localhost:8888
-
-server:
-  port: 8761

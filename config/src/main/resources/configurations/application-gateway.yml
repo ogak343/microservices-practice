@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: gateway-service
+  config:
+    import: optional:configserver:127.0.0.1:8888
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      mvc:
+        routes:
+          - id: customer
+            uri: lb:http://CUSTOMER
+            predicates:
+              - Path=/customers/**
+          - id: order
+            uri: lb:http://ORDER
+            predicates:
+              - Path=/orders/**
+          - id: product
+            uri: lb:http://PRODUCT
+            predicates:
+              - Path=/products/**
+          - id: payment
+            uri: lb:http://PAYMENT
+            predicates:
+              - Path=/api/v1/payments/**
+server:
+  port: 8222

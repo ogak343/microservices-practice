@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: notification
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: khamdamov343@gmail.com
+    password: lmqptmcnehcfdmoo
+    protocol: smtps
+    default-encoding: UTF-8
+  # sender: can be set Sender linked to username
+server:
+  port: 8090
+
+kafka:
+  topic:
+    email: topicEmail
+    sms: topicSMS
+template:
+  accountVerification:
+    - "otpCode"
+  paymentCreation:
+    - "description"
+    - "price"
+    - "otpCode"
+  paymentPerform:
+    - "message"
+    - "price"
