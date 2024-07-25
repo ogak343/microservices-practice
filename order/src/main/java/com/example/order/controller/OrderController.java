@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -40,6 +41,7 @@ public class OrderController {
     }
 
     @PostMapping("/verify")
+    @PreAuthorize("hasAuthority('ROLE_PAYMENT_SERVICE')")
     public ResponseEntity<Void> verify(@RequestParam("orderId") Long orderId) {
         log.info("Verify order: {}", orderId);
 

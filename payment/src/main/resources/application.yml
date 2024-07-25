@@ -26,6 +26,7 @@ spring:
       keycloak-url: http://127.0.0.1:8090
       keycloak-realm: master  #You have to create realm "online-store" in keycloak
       keycloak-base: ${spring.security.oauth2.keycloak-url}/realms/${spring.security.oauth2.keycloak-realm}
+      keycloak-token: /realms/${spring.security.oauth2.keycloak-realm}/protocol/openid-connect/token
       resourceserver:
         jwt:
           issuer-uri: ${spring.security.oauth2.keycloak-base}
@@ -41,8 +42,8 @@ spring:
         registration:
           keycloak:
             provider: keycloak
-            client-id: customer-service #You have to create client "customer-service" in keycloak
-            client-secret: 58zgNRKCYEDnOexkV1VbCg96yZ9tEfkc #client secret here
+            client-id: payment-service #You have to create client "customer-service" in keycloak
+            client-secret: b18SbAbGiMKNdWAaMo0XbqBsLzvfnFo2 #client secret here
             authorization-grant-type: client_credentials
 server:
   port: 8084
@@ -50,12 +51,7 @@ server:
 kafka:
   topic:
     email: topicEmail
-    sms: topicSMS
-feign:
-  client:
+web:
+  clients:
     order:
-      name: order-client
       url: http://127.0.0.1:8082
-
-jwt:
-  secretKey: 9CA722EACC9EDE9639E2A26BBEFFEC3B8711

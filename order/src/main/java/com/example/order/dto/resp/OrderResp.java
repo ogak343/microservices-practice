@@ -12,7 +12,7 @@ public class OrderResp {
     private Long id;
     private Set<ProductResp> productDetails;
     private BigInteger totalPrice;
-    private Long customerId;
+    private String customerId;
     private Status status;
     private OffsetDateTime createdAt;
     private OffsetDateTime payedAt;

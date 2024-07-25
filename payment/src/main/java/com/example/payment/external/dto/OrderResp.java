@@ -1,4 +1,4 @@
-package com.example.payment.external.feign.dto;
+package com.example.payment.external.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -14,7 +14,7 @@ public class OrderResp {
     private Long id;
     private BigInteger totalPrice;
     private Set<ProductResp> productDetails;
-    private Long customerId;
+    private String customerId;
     private Status status;
     private OffsetDateTime createdAt;
     private OffsetDateTime payedAt;

@@ -8,9 +8,9 @@ import com.example.payment.dto.PaymentPerformDto;
 import com.example.payment.entity.Payment;
 import com.example.payment.entity.PaymentOtp;
 import com.example.payment.config.exception.CustomException;
-import com.example.payment.external.feign.OrderClient;
-import com.example.payment.external.feign.dto.OrderResp;
-import com.example.payment.external.feign.dto.Status;
+import com.example.payment.external.OrderService;
+import com.example.payment.external.dto.OrderResp;
+import com.example.payment.external.dto.Status;
 import com.example.payment.repo.OtpRepository;
 import com.example.payment.repo.PaymentRepository;
 import com.example.payment.service.PaymentService;
@@ -30,7 +30,7 @@ import java.util.Map;
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final OrderClient orderClient;
+    private final OrderService orderService;
     private final KafkaPublisher kafkaPublisher;
     private final OtpRepository otpRepository;
 
@@ -40,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
         //Reminder: actual payment logic here
         //It is just a mock payment
 
-        var order = orderClient.getOrder(orderId);
+        var order = orderService.getOrder(orderId);
 
         if (order.getStatus() != Status.WAITING_FOR_PAYMENT)
             throw new CustomException(ErrorCode.INVALID_STATUS);
@@ -74,7 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
         otp.setConfirmedAt(OffsetDateTime.now());
         var payment = otp.getPayment();
 
-        orderClient.verifyOrder(payment.getOrderId());
+        orderService.verifyOrder(payment.getOrderId());
 
         payment.setPaymentStatus(PaymentStatus.PERFORMED);
         payment.setPerformedAt(OffsetDateTime.now());
@@ -91,7 +91,7 @@ public class PaymentServiceImpl implements PaymentService {
     private String getEmail() {
         var jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return jwt.getSubject();
+        return jwt.getClaimAsString("email");
     }
 
     private EmailReqDto makeOtpDto(Integer otpCode, OrderResp order, String email) {
